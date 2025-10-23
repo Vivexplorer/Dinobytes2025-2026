@@ -37,10 +37,14 @@ public class SampleAuton extends OpMode {
 
      public void autonomousPathUpdate() {
          switch(pathState) {
+             //score the preload
              case 0:
                  follower.followPath(scorePreload);
+                 launcher.setPower(-0.8);
                  setPathState(100);
                  break;
+
+                 //shoot the balls
 
              case 100:
                  if(!follower.isBusy()) {
@@ -49,8 +53,10 @@ public class SampleAuton extends OpMode {
                  }
                  break;
 
+                 //start using servo
+
              case 101:
-                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                 if (pathTimer.getElapsedTimeSeconds()>2.5) {
                      leftGate.setPosition(-0.8);
                      rightGate.setPosition(0.45);
                      setPathState(102);
@@ -58,7 +64,7 @@ public class SampleAuton extends OpMode {
                  break;
 
              case 102:
-                 if (pathTimer.getElapsedTimeSeconds()>0.8) {
+                 if (pathTimer.getElapsedTimeSeconds()>0.2) {
                      leftGate.setPosition(0.55);
                      rightGate.setPosition(-0.6);
                      setPathState(103);
@@ -66,7 +72,7 @@ public class SampleAuton extends OpMode {
                  break;
 
              case 103:
-                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                 if (pathTimer.getElapsedTimeSeconds()>0.5) {
                      leftGate.setPosition(-0.8);
                      rightGate.setPosition(0.45);
                      setPathState(104);
@@ -74,7 +80,7 @@ public class SampleAuton extends OpMode {
                  break;
 
              case 104:
-                 if (pathTimer.getElapsedTimeSeconds()>0.3) {
+                 if (pathTimer.getElapsedTimeSeconds()>0.2) {
                      leftGate.setPosition(0.55);
                      rightGate.setPosition(-0.6);
                      setPathState(105);
@@ -90,6 +96,22 @@ public class SampleAuton extends OpMode {
                  break;
 
              case 106:
+                 if (pathTimer.getElapsedTimeSeconds()>0.2) {
+                     leftGate.setPosition(0.55);
+                     rightGate.setPosition(-0.6);
+                     setPathState(107);
+                 }
+                 break;
+
+             case 107:
+                 if (pathTimer.getElapsedTimeSeconds()>0.5) {
+                     leftGate.setPosition(-0.8);
+                     rightGate.setPosition(0.45);
+                     setPathState(108);
+                 }
+                 break;
+
+             case 108:
                  if (pathTimer.getElapsedTimeSeconds()>0.3) {
                      leftGate.setPosition(0.55);
                      rightGate.setPosition(-0.6);
@@ -97,10 +119,12 @@ public class SampleAuton extends OpMode {
                  }
                  break;
 
+                 //intake from human player
+
 
 
              case 1:
-                 if(pathTimer.getElapsedTimeSeconds()>4.67) {
+                 if(pathTimer.getElapsedTimeSeconds()>2) {
                      leftGate.setPosition(-0.8);
                      rightGate.setPosition(0.45);
                      follower.followPath(intakeFromHuman);
@@ -108,8 +132,10 @@ public class SampleAuton extends OpMode {
                  }
                  break;
 
+                 //reset the cycle
+
              case 2:
-                 if(pathTimer.getElapsedTimeSeconds()>4) {
+                 if(pathTimer.getElapsedTimeSeconds()>3) {
                      follower.followPath(humanToScore);
                      setPathState(101);
                  }
@@ -122,13 +148,14 @@ public class SampleAuton extends OpMode {
      }
 
      public void shootBalls() {
-         launcher.setPower(-0.9);
+         launcher.setPower(-0.8);
+
          shootingTimer.resetTimer();
 
          leftGate.setPosition(0.55);
          rightGate.setPosition(-0.6);
          frontFeeder.setPosition(1.0);
-         rearFeeder.setPosition(0.0);
+         rearFeeder.setPosition(0.2);
 
 
          while(shootingTimer.getElapsedTimeSeconds()<0.2) {
