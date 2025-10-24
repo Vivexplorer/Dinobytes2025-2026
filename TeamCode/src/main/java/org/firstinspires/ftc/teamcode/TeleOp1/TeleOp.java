@@ -45,6 +45,8 @@ public class TeleOp extends OpMode {
 
     ElapsedTime timer = new ElapsedTime();
 
+    double reducedPower = 0.5;
+
     //Servo diverter;
 
     enum States {
@@ -86,6 +88,7 @@ public class TeleOp extends OpMode {
 
 
 
+
         // Resetting and enabling the elevator encoders
         leftLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -117,7 +120,7 @@ public class TeleOp extends OpMode {
         }
 
         if (gamepad2.a){
-            launcher.setPower(-0.86);
+            launcher.setPower(-0.84);
             frontFeeder.setPosition(1.0);
             rearFeeder.setPosition(0.0);
             timer.reset();
@@ -187,15 +190,18 @@ public class TeleOp extends OpMode {
         }
 
         if (gamepad1.a){
+            frontLeft.setPower((gamepad1.left_stick_y/2) + (-gamepad1.left_stick_x/2) + (-gamepad1.right_stick_x/2));
+            frontRight.setPower((-gamepad1.left_stick_y/2) + (-gamepad1.left_stick_x/2) + (-gamepad1.right_stick_x/2));
+            rearLeft.setPower((-gamepad1.left_stick_y/2) + (gamepad1.left_stick_x/2) + (-gamepad1.right_stick_x/2));
+            rearRight.setPower((gamepad1.left_stick_y/2) + (gamepad1.left_stick_x/2) + (-gamepad1.right_stick_x/2));
+        }
+        else {
+            frontLeft.setPower((gamepad1.left_stick_y) + (-gamepad1.left_stick_x) + (-gamepad1.right_stick_x));
+            frontRight.setPower((-gamepad1.left_stick_y) + (-gamepad1.left_stick_x) + (-gamepad1.right_stick_x));
+            rearLeft.setPower((-gamepad1.left_stick_y) + (gamepad1.left_stick_x) + (-gamepad1.right_stick_x));
+            rearRight.setPower((gamepad1.left_stick_y) + (gamepad1.left_stick_x) + (-gamepad1.right_stick_x));
 
         }
-
-
-
-        frontLeft.setPower((gamepad1.left_stick_y) + (-gamepad1.right_stick_x) + (-gamepad1.left_stick_x));
-        frontRight.setPower((-gamepad1.left_stick_y) + (-gamepad1.right_stick_x) + (-gamepad1.left_stick_x));
-        rearLeft.setPower((-gamepad1.left_stick_y) + (gamepad1.right_stick_x) + (-gamepad1.left_stick_x));
-        rearRight.setPower((gamepad1.left_stick_y) + (gamepad1.right_stick_x) + (-gamepad1.left_stick_x));
 
 
 
