@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "Sample Auton")
-public class SampleAuton extends OpMode {
+@Autonomous(name = "RearRedAuton")
+public class RearRedAuton extends OpMode {
 
     DcMotorEx launcher;
 
