@@ -8,35 +8,49 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Configurable
-public class Shooter {
-    DcMotorEx launcher;
+public class Outtake {
+    public  DcMotorEx launcher;
 
     HardwareMap hardwareMap;
 
     Telemetry telemetry;
 
+    public static Servo leftGate;
+
+    public static Servo rightGate;
+
+    public static Servo rearFeeder;
+
+    public static Servo frontFeeder;
 
 
 
 
 
 
-    public static double kP = 0.01, kI, kD, kF = 0.1;
+    public static double kP = -0.01, kI, kD, kF = -0.1;
 
     static PIDFController pidf;
 
-    public static double velocityWanted = 125.0/60;
+    public double velocityWanted = 125.0/60;
 
 
-    public Shooter(HardwareMap hardwareMap) {
+    public Outtake(HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        launcher.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        launcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftGate = hardwareMap.get(Servo.class, "leftGate");
+        rightGate = hardwareMap.get(Servo.class, "rightGate");
+        rearFeeder = hardwareMap.get(Servo.class, "rearFeeder");
+        frontFeeder = hardwareMap.get(Servo.class, "frontFeeder");
 
         telemetry = new Telemetry() {
             @Override
@@ -170,6 +184,20 @@ public class Shooter {
 
     }
 
+    public void closeGates() {
+        leftGate.setPosition(-0.8);
+        rightGate.setPosition(0.45);
+    }
+    public void openGates() {
+        leftGate.setPosition(0.55);
+        rightGate.setPosition(-0.6);
+    }
+
+    public void runFeeder() {
+        frontFeeder.setPosition(1.0);
+        rearFeeder.setPosition(0.0);
+    }
+
 
 
     public void ShootBallLoop() {
@@ -179,7 +207,7 @@ public class Shooter {
                     launcher.getVelocity(), velocityWanted
             );
 
-            launcher.setPower(error);
+            launcher.setVelocity(error);
             telemetry.addData("Launcher Velocity", launcher.getVelocity());
             telemetry.update();
         }
