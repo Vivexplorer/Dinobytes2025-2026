@@ -34,11 +34,19 @@ public class Outtake {
 
 
 
-    public static double kP = -0.01, kI, kD, kF = -0.1;
+    public static double kP = -0.8, kI, kD, kF = 0;
 
     static PIDFController pidf;
 
-    public double velocityWanted = 125.0/60;
+    public static double velocityWantedForLong = 915;
+
+    public static double velocityWantedForShort = 680;
+
+    public static double velocityWanted;
+
+    public static boolean longShooting = true;
+
+    public double error;
 
 
     public Outtake(HardwareMap hardwareMap) {
@@ -200,16 +208,23 @@ public class Outtake {
 
 
 
+
+
     public void ShootBallLoop() {
-        while (launcher.getVelocity()<velocityWanted || launcher.getVelocity()>velocityWanted) {
 
-            double error = pidf.calculate(
-                    launcher.getVelocity(), velocityWanted
-            );
-
-            launcher.setVelocity(error);
-            telemetry.addData("Launcher Velocity", launcher.getVelocity());
-            telemetry.update();
+        if (longShooting == true) {
+            velocityWanted = velocityWantedForLong;
+        } else {
+            velocityWanted = velocityWantedForShort;
         }
+
+        error = pidf.calculate(
+                launcher.getVelocity(), velocityWanted
+        );
+
+
+        telemetry.addData("Launcher Velocity", launcher.getVelocity());
+        telemetry.update();
+
     }
 }

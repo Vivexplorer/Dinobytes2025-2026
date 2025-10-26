@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -13,11 +14,9 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "RearRedAuton2Ball")
-public class RearRedAuton2Ball extends OpMode {
+public class AutonAll4Sides extends OpMode {
 
-    Intake intake;
 
-    Outtake outtake;
 
     Follower follower;
 
@@ -28,7 +27,7 @@ public class RearRedAuton2Ball extends OpMode {
     private final Pose startPose = new Pose(39, 9, Math.toRadians(90));
     private final Pose shoot1Pose = new Pose(56, 15, Math.toRadians(60));
 
-    private final Pose parkPose = new Pose(42, 36, Math.toRadians(180));
+    private final Pose parkPose = new Pose(39, 13, Math.toRadians(90));
 
     private Path score;
 
@@ -55,7 +54,7 @@ public class RearRedAuton2Ball extends OpMode {
 
     public void buildPaths() {
         score = new Path(new BezierLine(startPose, parkPose));
-        score.setLinearHeadingInterpolation(startPose.getHeading(), parkPose.getHeading());
+        score.setConstantHeadingInterpolation(startPose.getHeading());
 
 
     }
@@ -72,13 +71,11 @@ public class RearRedAuton2Ball extends OpMode {
 
         buildPaths();
 
-        intake = new Intake(hardwareMap);
-        outtake = new Outtake(hardwareMap);
         follower = Constants.createFollower(hardwareMap);
 
         follower.setStartingPose(startPose);
 
-        outtake.closeGates();
+
 
 
 
