@@ -185,12 +185,12 @@ public class Outtake {
     }
 
     public void closeGates() {
-        leftGate.setPosition(-0.8);
-        rightGate.setPosition(0.45);
+        leftGate.setPosition(0.2);
+        rightGate.setPosition(0.8);
     }
     public void openGates() {
-        leftGate.setPosition(0.55);
-        rightGate.setPosition(-0.6);
+        leftGate.setPosition(0.9);
+        rightGate.setPosition(0.3);
     }
 
     public void runFeeder() {

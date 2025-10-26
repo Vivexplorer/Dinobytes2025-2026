@@ -9,12 +9,20 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.Subsystems.Intake;
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "RearRedAuton")
 public class RearRedAuton extends OpMode {
+    Intake intake;
+
+    Outtake outtake;
+
+
 
     DcMotorEx launcher;
 
@@ -57,64 +65,56 @@ public class RearRedAuton extends OpMode {
 
              case 101:
                  if (pathTimer.getElapsedTimeSeconds()>2.5) {
-                     leftGate.setPosition(-0.8);
-                     rightGate.setPosition(0.45);
+                     outtake.closeGates();
                      setPathState(102);
                  }
                  break;
 
              case 102:
                  if (pathTimer.getElapsedTimeSeconds()>0.2) {
-                     leftGate.setPosition(0.55);
-                     rightGate.setPosition(-0.6);
+                     outtake.openGates();
                      setPathState(103);
                  }
                  break;
 
              case 103:
                  if (pathTimer.getElapsedTimeSeconds()>0.5) {
-                     leftGate.setPosition(-0.8);
-                     rightGate.setPosition(0.45);
+                     outtake.closeGates();
                      setPathState(104);
                  }
                  break;
 
              case 104:
                  if (pathTimer.getElapsedTimeSeconds()>0.2) {
-                     leftGate.setPosition(0.55);
-                     rightGate.setPosition(-0.6);
+                     outtake.openGates();
                      setPathState(105);
                  }
                  break;
 
              case 105:
                  if (pathTimer.getElapsedTimeSeconds()>0.5) {
-                     leftGate.setPosition(-0.8);
-                     rightGate.setPosition(0.45);
+                     outtake.closeGates();
                      setPathState(106);
                  }
                  break;
 
              case 106:
                  if (pathTimer.getElapsedTimeSeconds()>0.2) {
-                     leftGate.setPosition(0.55);
-                     rightGate.setPosition(-0.6);
+                     outtake.openGates();
                      setPathState(107);
                  }
                  break;
 
              case 107:
                  if (pathTimer.getElapsedTimeSeconds()>0.5) {
-                     leftGate.setPosition(-0.8);
-                     rightGate.setPosition(0.45);
+                     outtake.closeGates();
                      setPathState(108);
                  }
                  break;
 
              case 108:
                  if (pathTimer.getElapsedTimeSeconds()>0.3) {
-                     leftGate.setPosition(0.55);
-                     rightGate.setPosition(-0.6);
+                     outtake.openGates();
                      setPathState(1);
                  }
                  break;
@@ -125,8 +125,7 @@ public class RearRedAuton extends OpMode {
 
              case 1:
                  if(pathTimer.getElapsedTimeSeconds()>2) {
-                     leftGate.setPosition(-0.8);
-                     rightGate.setPosition(0.45);
+                     outtake.closeGates();
                      follower.followPath(intakeFromHuman);
                      setPathState(2);
                  }
@@ -201,6 +200,9 @@ public class RearRedAuton extends OpMode {
          shootingTimer = new Timer();
          opmodeTimer.resetTimer();
 
+         outtake = new Outtake(hardwareMap);
+         intake = new Intake(hardwareMap);
+
          follower = Constants.createFollower(hardwareMap);
          buildPaths();
          follower.setStartingPose(startPose);
@@ -212,8 +214,7 @@ public class RearRedAuton extends OpMode {
          rearFeeder = hardwareMap.get(Servo.class, "rearFeeder");
          frontFeeder = hardwareMap.get(Servo.class, "frontFeeder");
 
-        leftGate.setPosition(-0.8);
-        rightGate.setPosition(0.45);
+        outtake.closeGates();
 
     }
 

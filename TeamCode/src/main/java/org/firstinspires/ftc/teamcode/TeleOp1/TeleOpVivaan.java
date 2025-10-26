@@ -64,6 +64,7 @@ public class TeleOpVivaan extends OpMode {
                 break;
 
             case Ready_To_Outtake:
+                outtake.ShootBallLoop();
                 break;
 
             case Short_Range_Shooting:
