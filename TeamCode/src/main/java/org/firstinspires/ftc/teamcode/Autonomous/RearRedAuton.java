@@ -32,112 +32,146 @@ public class RearRedAuton extends OpMode {
 
      private int pathState;
 
-     private final Pose startPose = new Pose(108, 9, Math.toRadians(90));
-     private final Pose shoot1Pose = new Pose(80, 15, Math.toRadians(65));
+    private final Pose startPose = new Pose(108, 9, Math.toRadians(90));
+     private final Pose shootLong = new Pose(80, 15, Math.toRadians(65));
 
-     private final Pose humanPlayerPose = new Pose(126,12, Math.toRadians(90));
+     private final Pose readyToIntake = new Pose(104, 37, Math.toRadians(0));
+
+     private final Pose moveToIntake = new Pose(116.5, 37, Math.toRadians(0));
+
+     private final Pose moveToCloseScore = new Pose(85, 84, Math.toRadians(45));
 
      private Path scorePreload;
 
-     private Path intakeFromHuman;
+     private Path readyToIntakeFirst;
 
-     private Path humanToScore;
+     private Path moveToIntakeFirst;
+
+     private Path moveToScore;
 
      public void autonomousPathUpdate() {
          switch(pathState) {
              //score the preload
              case 0:
                  follower.followPath(scorePreload);
-                 launcher.setPower(-0.8);
-                 setPathState(100);
+                 outtake.ShootBallLoop();
+                 setPathState(1);
                  break;
-
-                 //shoot the balls
-
-             case 100:
-                 if(!follower.isBusy()) {
-                     shootBalls();
-                     setPathState(101);
-                 }
-                 break;
-
-                 //start using servo
-
-             case 101:
-                 if (pathTimer.getElapsedTimeSeconds()>2.5) {
-                     outtake.closeGates();
-                     setPathState(102);
-                 }
-                 break;
-
-             case 102:
-                 if (pathTimer.getElapsedTimeSeconds()>0.2) {
-                     outtake.openGates();
-                     setPathState(103);
-                 }
-                 break;
-
-             case 103:
-                 if (pathTimer.getElapsedTimeSeconds()>0.5) {
-                     outtake.closeGates();
-                     setPathState(104);
-                 }
-                 break;
-
-             case 104:
-                 if (pathTimer.getElapsedTimeSeconds()>0.2) {
-                     outtake.openGates();
-                     setPathState(105);
-                 }
-                 break;
-
-             case 105:
-                 if (pathTimer.getElapsedTimeSeconds()>0.5) {
-                     outtake.closeGates();
-                     setPathState(106);
-                 }
-                 break;
-
-             case 106:
-                 if (pathTimer.getElapsedTimeSeconds()>0.2) {
-                     outtake.openGates();
-                     setPathState(107);
-                 }
-                 break;
-
-             case 107:
-                 if (pathTimer.getElapsedTimeSeconds()>0.5) {
-                     outtake.closeGates();
-                     setPathState(108);
-                 }
-                 break;
-
-             case 108:
-                 if (pathTimer.getElapsedTimeSeconds()>0.3) {
-                     outtake.openGates();
-                     setPathState(1);
-                 }
-                 break;
-
-                 //intake from human player
-
-
 
              case 1:
                  if(pathTimer.getElapsedTimeSeconds()>2) {
-                     outtake.closeGates();
-                     follower.followPath(intakeFromHuman);
+                     intake.spinIntake();
+                     outtake.runFeeder();
+                     outtake.openLeftGate();
                      setPathState(2);
                  }
                  break;
 
-                 //reset the cycle
-
              case 2:
-                 if(pathTimer.getElapsedTimeSeconds()>3) {
-                     follower.followPath(humanToScore);
-                     setPathState(101);
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     outtake.closeBoot();
+                     setPathState(3);
                  }
+                 break;
+
+             case 3:
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                    outtake.openBoot();
+                    outtake.closeLeftGate();
+                    outtake.closeRightGate();
+                    setPathState(4);
+
+                 }
+                 break;
+             case 4:
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                     outtake.openRightGate();
+                     outtake.openLeftGate();
+                     setPathState(5);
+                 }
+                 break;
+
+             case 5:
+                 if (pathTimer.getElapsedTimeSeconds()>2.5) {
+                     outtake.closeBoot();
+                     setPathState(6);
+                 }
+                 break;
+
+             case 6:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     outtake.closeRightGate();
+                     outtake.closeLeftGate();
+                     outtake.openBoot();
+                     follower.followPath(readyToIntakeFirst);
+                     intake.spinIntake();
+                     setPathState(7);
+                 }
+                 break;
+
+             case 7:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     follower.setMaxPower(0.3);
+                     follower.followPath(moveToIntakeFirst);
+                     setPathState(8);
+                 }
+                 break;
+
+             case 8:
+                 if(pathTimer.getElapsedTimeSeconds()>2) {
+                     follower.setMaxPower(1);
+                     follower.followPath(moveToScore);
+                     setPathState(9);
+                 }
+                 break;
+
+
+             case 9:
+                 if(pathTimer.getElapsedTimeSeconds()>2) {
+                     intake.spinIntake();
+                     outtake.runFeeder();
+                     outtake.openLeftGate();
+                     setPathState(10);
+                 }
+                 break;
+
+             case 10:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     outtake.closeBoot();
+                     setPathState(11);
+                 }
+                 break;
+
+             case 11:
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                     outtake.openBoot();
+                     outtake.closeLeftGate();
+                     outtake.closeRightGate();
+                     setPathState(12);
+
+                 }
+                 break;
+             case 12:
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                     outtake.openRightGate();
+                     outtake.openLeftGate();
+                     setPathState(13);
+                 }
+                 break;
+
+             case 13:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     outtake.closeBoot();
+                     setPathState(14);
+                 }
+                 break;
+
+
+
+
+                 //shoot the balls
+
+
          }
      }
 
@@ -146,43 +180,23 @@ public class RearRedAuton extends OpMode {
          pathTimer.resetTimer();
      }
 
-     public void shootBalls() {
-         launcher.setPower(-0.8);
 
-         shootingTimer.resetTimer();
-
-         leftGate.setPosition(0.55);
-         rightGate.setPosition(-0.6);
-         frontFeeder.setPosition(1.0);
-         rearFeeder.setPosition(0.2);
-
-
-         while(shootingTimer.getElapsedTimeSeconds()<0.2) {
-             leftGate.setPosition(-0.8);
-             rightGate.setPosition(0.45);
-
-         }
-
-         shootingTimer.resetTimer();
-
-         while(shootingTimer.getElapsedTimeSeconds()<0.3) {
-             leftGate.setPosition(0.55);
-             rightGate.setPosition(-0.6);
-
-         }
-
-     }
 
      public void buildPaths() {
-         scorePreload = new Path(new BezierLine(startPose, shoot1Pose));
-                 scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), shoot1Pose.getHeading());
+         scorePreload = new Path(new BezierLine(startPose, shootLong));
+         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), shootLong.getHeading());
 
-                 intakeFromHuman = new Path(new BezierLine(shoot1Pose, humanPlayerPose));
-                 intakeFromHuman.setLinearHeadingInterpolation(shoot1Pose.getHeading(), humanPlayerPose.getHeading());
+         readyToIntakeFirst = new Path(new BezierLine(shootLong, readyToIntake));
+         readyToIntakeFirst.setLinearHeadingInterpolation(shootLong.getHeading(), readyToIntake.getHeading());
 
-                 humanToScore = new Path(new BezierLine(humanPlayerPose, shoot1Pose));
-                 humanToScore.setLinearHeadingInterpolation(humanPlayerPose.getHeading(), shoot1Pose.getHeading());
+         moveToIntakeFirst = new Path(new BezierLine(readyToIntake, moveToIntake));
+         moveToIntakeFirst.setTangentHeadingInterpolation();
+         moveToIntakeFirst.setVelocityConstraint(0.1);
+
+         moveToScore = new Path(new BezierLine(moveToIntake, moveToCloseScore));
+         moveToScore.setLinearHeadingInterpolation(moveToIntake.getHeading(), moveToCloseScore.getHeading());
      }
+
 
      @Override
      public void loop() {
@@ -211,10 +225,9 @@ public class RearRedAuton extends OpMode {
 
          leftGate = hardwareMap.get(Servo.class, "leftGate");
          rightGate = hardwareMap.get(Servo.class, "rightGate");
-         rearFeeder = hardwareMap.get(Servo.class, "rearFeeder");
-         frontFeeder = hardwareMap.get(Servo.class, "frontFeeder");
 
         outtake.closeGates();
+        outtake.openBoot();
 
     }
 

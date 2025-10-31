@@ -20,4 +20,7 @@ public class Intake {
     public void spinIntake() {
         intake.setPower(1);
     }
+
+    public void reverseIntake() {intake.setPower(-1);}
+
 }

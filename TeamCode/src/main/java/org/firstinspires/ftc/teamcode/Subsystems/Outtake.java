@@ -7,6 +7,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -25,28 +26,20 @@ public class Outtake {
 
     public static Servo rightGate;
 
-    public static Servo rearFeeder;
-
     public static Servo frontFeeder;
 
+    public static Servo rearFeeder;
+
+    public static double velo = 1675;
 
 
 
 
 
-    public static double kP = -0.8, kI, kD, kF = 0;
-
-    static PIDFController pidf;
-
-    public static double velocityWantedForLong = 915;
-
-    public static double velocityWantedForShort = 680;
 
     public static double velocityWanted;
 
-    public static boolean longShooting = true;
 
-    public double error;
 
 
     public Outtake(HardwareMap hardwareMap) {
@@ -59,6 +52,12 @@ public class Outtake {
         rightGate = hardwareMap.get(Servo.class, "rightGate");
         rearFeeder = hardwareMap.get(Servo.class, "rearFeeder");
         frontFeeder = hardwareMap.get(Servo.class, "frontFeeder");
+        frontFeeder.setDirection(Servo.Direction.REVERSE);
+
+
+        launcher.setDirection(DcMotorSimple.Direction.REVERSE);
+        launcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         telemetry = new Telemetry() {
             @Override
@@ -187,9 +186,24 @@ public class Outtake {
             }
         };
 
-        pidf = new PIDFController(kP, kI, kD, kF);
-        pidf.setPIDF(kP, kI, kD, kF);
 
+
+    }
+
+    public void openLeftGate() {
+        leftGate.setPosition(0.9);
+    }
+
+    public void openRightGate() {
+        rightGate.setPosition(0.3);
+    }
+
+    public void closeLeftGate() {
+        leftGate.setPosition(0.2);
+    }
+
+    public void closeRightGate() {
+        rightGate.setPosition(0.8);
     }
 
     public void closeGates() {
@@ -202,8 +216,13 @@ public class Outtake {
     }
 
     public void runFeeder() {
-        frontFeeder.setPosition(1.0);
-        rearFeeder.setPosition(0.0);
+        frontFeeder.setPosition(-1.0);
+    }
+    public void openBoot(){
+        rearFeeder.setPosition(1.5);
+    }
+    public void closeBoot(){
+        rearFeeder.setPosition(0.3);
     }
 
 
@@ -211,20 +230,6 @@ public class Outtake {
 
 
     public void ShootBallLoop() {
-
-        if (longShooting == true) {
-            velocityWanted = velocityWantedForLong;
-        } else {
-            velocityWanted = velocityWantedForShort;
-        }
-
-        error = pidf.calculate(
-                launcher.getVelocity(), velocityWanted
-        );
-
-
-        telemetry.addData("Launcher Velocity", launcher.getVelocity());
-        telemetry.update();
-
+        launcher.setVelocity(velo);
     }
 }
