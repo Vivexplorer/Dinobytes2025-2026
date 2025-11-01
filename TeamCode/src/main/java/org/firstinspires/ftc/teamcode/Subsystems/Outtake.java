@@ -30,7 +30,7 @@ public class Outtake {
 
     public static Servo rearFeeder;
 
-    public static double velo = 1675;
+    public static double velo = 1695;
 
 
 
@@ -191,11 +191,11 @@ public class Outtake {
     }
 
     public void openLeftGate() {
-        leftGate.setPosition(0.9);
+        leftGate.setPosition(0.8);
     }
 
     public void openRightGate() {
-        rightGate.setPosition(0.3);
+        rightGate.setPosition(0.4);
     }
 
     public void closeLeftGate() {

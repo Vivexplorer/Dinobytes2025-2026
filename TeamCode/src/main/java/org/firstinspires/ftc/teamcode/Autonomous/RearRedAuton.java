@@ -35,15 +35,20 @@ public class RearRedAuton extends OpMode {
     private final Pose startPose = new Pose(108, 9, Math.toRadians(90));
      private final Pose shootLong = new Pose(80, 15, Math.toRadians(65));
 
-     private final Pose readyToIntake = new Pose(104, 37, Math.toRadians(0));
+     private final Pose readyToIntake = new Pose(101, 38, Math.toRadians(0));
 
-     private final Pose moveToIntake2 = new Pose(120,59, Math.toRadians(0));
+    private final Pose moveToIntake = new Pose(123.5, 38, Math.toRadians(0));
 
-     private final Pose moveToIntake = new Pose(116.5, 37, Math.toRadians(0));
 
-     private final Pose readyToIntake2 = new Pose(102, 59, Math.toRadians(0));
+    private final Pose readyToIntake2 = new Pose(100, 56, Math.toRadians(0));
+
+    private final Pose moveToIntake2 = new Pose(120.5,56, Math.toRadians(0));
+
+
 
      private final Pose moveToCloseScore = new Pose(85, 84, Math.toRadians(45));
+
+
 
      private Path scorePreload;
 
@@ -58,6 +63,8 @@ public class RearRedAuton extends OpMode {
 
      private Path moveToScore;
 
+     private Path moveToCloseScore1;
+
      public void autonomousPathUpdate() {
          switch(pathState) {
              //score the preload
@@ -67,8 +74,10 @@ public class RearRedAuton extends OpMode {
                  setPathState(1);
                  break;
 
+                 //start shooting sequence
+
              case 1:
-                 if(pathTimer.getElapsedTimeSeconds()>2) {
+                 if(pathTimer.getElapsedTimeSeconds()>1) {
                      intake.spinIntake();
                      outtake.runFeeder();
                      outtake.openLeftGate();
@@ -76,12 +85,16 @@ public class RearRedAuton extends OpMode {
                  }
                  break;
 
+                 //shoot first ball
+
              case 2:
                  if (pathTimer.getElapsedTimeSeconds()>2) {
                      outtake.closeBoot();
                      setPathState(3);
                  }
                  break;
+
+                 //start shooting sequence
 
              case 3:
                  if (pathTimer.getElapsedTimeSeconds()>1) {
@@ -92,6 +105,8 @@ public class RearRedAuton extends OpMode {
 
                  }
                  break;
+
+
              case 4:
                  if (pathTimer.getElapsedTimeSeconds()>1) {
                      outtake.openRightGate();
@@ -100,15 +115,17 @@ public class RearRedAuton extends OpMode {
                  }
                  break;
 
+                 //shoot second ball
+
              case 5:
-                 if (pathTimer.getElapsedTimeSeconds()>2.5) {
+                 if (pathTimer.getElapsedTimeSeconds()>1.75) {
                      outtake.closeBoot();
                      setPathState(6);
                  }
                  break;
 
              case 6:
-                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
                      outtake.closeRightGate();
                      outtake.closeLeftGate();
                      outtake.openBoot();
@@ -127,7 +144,7 @@ public class RearRedAuton extends OpMode {
                  break;
 
              case 8:
-                 if(pathTimer.getElapsedTimeSeconds()>2) {
+                 if(pathTimer.getElapsedTimeSeconds()>1.5) {
                      follower.setMaxPower(1);
                      follower.followPath(moveToScore);
                      setPathState(9);
@@ -136,7 +153,7 @@ public class RearRedAuton extends OpMode {
 
 
              case 9:
-                 if(pathTimer.getElapsedTimeSeconds()>2) {
+                 if(pathTimer.getElapsedTimeSeconds()>1.5) {
                      intake.spinIntake();
                      outtake.runFeeder();
                      outtake.openLeftGate();
@@ -145,7 +162,7 @@ public class RearRedAuton extends OpMode {
                  break;
 
              case 10:
-                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
                      outtake.closeBoot();
                      setPathState(11);
                  }
@@ -174,8 +191,9 @@ public class RearRedAuton extends OpMode {
                      setPathState(14);
                  }
                  break;
+
              case 14:
-                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                 if (pathTimer.getElapsedTimeSeconds()>0.75) {
                      outtake.closeRightGate();
                      outtake.closeLeftGate();
                      outtake.openBoot();
@@ -185,7 +203,7 @@ public class RearRedAuton extends OpMode {
                  }
                  break;
              case 15:
-                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                 if (pathTimer.getElapsedTimeSeconds()>1.25) {
                      follower.setMaxPower(0.3);
                      follower.followPath(moveToIntakeSecond);
                      setPathState(16);
@@ -194,7 +212,7 @@ public class RearRedAuton extends OpMode {
              case 16:
                  if (pathTimer.getElapsedTimeSeconds()>2) {
                      follower.setMaxPower(1);
-                     follower.followPath(moveToScore);
+                     follower.followPath(moveToCloseScore1);
                      setPathState(17);
                  }
                  break;
@@ -232,10 +250,11 @@ public class RearRedAuton extends OpMode {
                  break;
 
              case 21:
-                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
                      outtake.closeBoot();
                      setPathState(22);
                  }
+                 break;
 
 
                  //shoot the balls
@@ -262,14 +281,17 @@ public class RearRedAuton extends OpMode {
          moveToIntakeFirst.setTangentHeadingInterpolation();
          // moveToIntakeFirst.setVelocityConstraint(0.1); (unnecessary?)
 
-         moveToScore = new Path(new BezierLine(moveToIntake, moveToCloseScore));
-         moveToScore.setLinearHeadingInterpolation(moveToIntake.getHeading(), moveToCloseScore.getHeading());
+         moveToScore = new Path(new BezierLine(moveToIntake, shootLong));
+         moveToScore.setLinearHeadingInterpolation(moveToIntake.getHeading(), shootLong.getHeading());
 
-         readyToIntakeSecond = new Path(new BezierLine(moveToCloseScore, readyToIntake2));
-         readyToIntakeSecond.setLinearHeadingInterpolation(moveToCloseScore.getHeading(), readyToIntake2.getHeading());
-
+         readyToIntakeSecond = new Path(new BezierLine(shootLong, readyToIntake2));
+         readyToIntakeSecond.setLinearHeadingInterpolation(shootLong.getHeading(), readyToIntake2.getHeading());
+//
          moveToIntakeSecond = new Path(new BezierLine(readyToIntake2, moveToIntake2));
          moveToIntakeSecond.setTangentHeadingInterpolation();
+
+         moveToCloseScore1 = new Path(new BezierLine(moveToIntake2, moveToCloseScore));
+         moveToCloseScore1.setLinearHeadingInterpolation(moveToIntake2.getHeading(), moveToCloseScore.getHeading());
      }
 
 
