@@ -37,7 +37,11 @@ public class RearRedAuton extends OpMode {
 
      private final Pose readyToIntake = new Pose(104, 37, Math.toRadians(0));
 
+     private final Pose moveToIntake2 = new Pose(120,59, Math.toRadians(0));
+
      private final Pose moveToIntake = new Pose(116.5, 37, Math.toRadians(0));
+
+     private final Pose readyToIntake2 = new Pose(102, 59, Math.toRadians(0));
 
      private final Pose moveToCloseScore = new Pose(85, 84, Math.toRadians(45));
 
@@ -45,7 +49,12 @@ public class RearRedAuton extends OpMode {
 
      private Path readyToIntakeFirst;
 
+     private Path moveToIntakeSecond;
+
      private Path moveToIntakeFirst;
+
+     private Path readyToIntakeSecond;
+
 
      private Path moveToScore;
 
@@ -165,8 +174,68 @@ public class RearRedAuton extends OpMode {
                      setPathState(14);
                  }
                  break;
+             case 14:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     outtake.closeRightGate();
+                     outtake.closeLeftGate();
+                     outtake.openBoot();
+                     follower.followPath(readyToIntakeSecond);
+                     intake.spinIntake();
+                     setPathState(15);
+                 }
+                 break;
+             case 15:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     follower.setMaxPower(0.3);
+                     follower.followPath(moveToIntakeSecond);
+                     setPathState(16);
+                 }
+                 break;
+             case 16:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     follower.setMaxPower(1);
+                     follower.followPath(moveToScore);
+                     setPathState(17);
+                 }
+                 break;
+             case 17:
+                 if(pathTimer.getElapsedTimeSeconds()>2) {
+                     intake.spinIntake();
+                     outtake.runFeeder();
+                     outtake.openLeftGate();
+                     setPathState(18);
+                 }
+                 break;
 
+             case 18:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     outtake.closeBoot();
+                     setPathState(19);
+                 }
+                 break;
 
+             case 19:
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                     outtake.openBoot();
+                     outtake.closeLeftGate();
+                     outtake.closeRightGate();
+                     setPathState(20);
+
+                 }
+                 break;
+             case 20:
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                     outtake.openRightGate();
+                     outtake.openLeftGate();
+                     setPathState(21);
+                 }
+                 break;
+
+             case 21:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     outtake.closeBoot();
+                     setPathState(22);
+                 }
 
 
                  //shoot the balls
@@ -191,10 +260,16 @@ public class RearRedAuton extends OpMode {
 
          moveToIntakeFirst = new Path(new BezierLine(readyToIntake, moveToIntake));
          moveToIntakeFirst.setTangentHeadingInterpolation();
-         moveToIntakeFirst.setVelocityConstraint(0.1);
+         // moveToIntakeFirst.setVelocityConstraint(0.1); (unnecessary?)
 
          moveToScore = new Path(new BezierLine(moveToIntake, moveToCloseScore));
          moveToScore.setLinearHeadingInterpolation(moveToIntake.getHeading(), moveToCloseScore.getHeading());
+
+         readyToIntakeSecond = new Path(new BezierLine(moveToCloseScore, readyToIntake2));
+         readyToIntakeSecond.setLinearHeadingInterpolation(moveToCloseScore.getHeading(), readyToIntake2.getHeading());
+
+         moveToIntakeSecond = new Path(new BezierLine(readyToIntake2, moveToIntake2));
+         moveToIntakeSecond.setTangentHeadingInterpolation();
      }
 
 
