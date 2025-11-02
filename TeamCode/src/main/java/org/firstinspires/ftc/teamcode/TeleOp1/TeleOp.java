@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-
+import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Initital TeleOp")
@@ -45,6 +45,10 @@ public class TeleOp extends OpMode {
 
     ElapsedTime timer = new ElapsedTime();
 
+    Outtake outtake;
+
+    double reducedPower = 0.5;
+
     //Servo diverter;
 
     enum States {
@@ -68,6 +72,8 @@ public class TeleOp extends OpMode {
     @Override
     public void init() {
 
+        outtake = new Outtake(hardwareMap);
+
         //Drivetrain motors Hardware Map
         rearRight = hardwareMap.get(DcMotorEx.class,"leftBackDrive");
         rearLeft = hardwareMap.get(DcMotorEx.class, "rightBackDrive");
@@ -86,6 +92,7 @@ public class TeleOp extends OpMode {
 
 
 
+
         // Resetting and enabling the elevator encoders
         leftLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -94,12 +101,13 @@ public class TeleOp extends OpMode {
         rightLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
-        leftGate.setPosition(-0.8);
-        rightGate.setPosition(0.45);
+        outtake.closeGates();
 
     }
     @Override
     public void loop() {
+
+
 
 
         if (gamepad2.right_trigger > 0) {
@@ -117,36 +125,36 @@ public class TeleOp extends OpMode {
         }
 
         if (gamepad2.a){
-            launcher.setPower(-0.86);
+            launcher.setPower(-0.8);
+            //            while (outtake.launcher.getVelocity()<outtake.velocityWanted || outtake.launcher.getVelocity()>outtake.velocityWanted) {
+//                outtake.launcher.setVelocity(outtake.error);
+//            }
             frontFeeder.setPosition(1.0);
             rearFeeder.setPosition(0.0);
             timer.reset();
-            while (timer.seconds() < 3) {
+            while (timer.seconds() < 2.2) {
                 // Optional: Add telemetry to monitor
                 telemetry.addData("Status", "Motor accelerating...");
                 telemetry.addData("Time", "%.1f seconds", timer.seconds());
                 telemetry.update();
             }
 
-            leftGate.setPosition(0.55);
-            rightGate.setPosition(-0.6);
+            outtake.openGates();
 //            frontFeeder.setPosition(1.0);
 //            rearFeeder.setPosition(0.0);
             timer.reset();
             while (timer.seconds() < 0.2) {
-                leftGate.setPosition(-0.8);
-                rightGate.setPosition(0.45);
+                outtake.closeGates();
             }
             timer.reset();
             while (timer.seconds() < 0.2) {
-                leftGate.setPosition(0.55);
-                rightGate.setPosition(-0.6);
+                outtake.openGates();
 
             }
         }
 
         if (gamepad2.y){
-            launcher.setPower(-0.80);
+            outtake.launcher.setPower(-0.63);
             frontFeeder.setPosition(1.0);
             rearFeeder.setPosition(0.0);
             timer.reset();
@@ -157,45 +165,42 @@ public class TeleOp extends OpMode {
                 telemetry.update();
             }
 
-            leftGate.setPosition(0.55);
-            rightGate.setPosition(-0.6);
-//            frontFeeder.setPosition(1.0);
-//            rearFeeder.setPosition(0.0);
+            outtake.openGates();
+
             timer.reset();
             while (timer.seconds() < 0.2) {
-                leftGate.setPosition(-0.8);
-                rightGate.setPosition(0.45);
+                outtake.closeGates();
             }
             timer.reset();
             while (timer.seconds() < 0.3) {
-                leftGate.setPosition(0.55);
-                rightGate.setPosition(-0.6);
+                outtake.openGates();
 
             }
         }
 
 
         if (gamepad2.b){
-            leftGate.setPosition(0.55);
-            rightGate.setPosition(-0.6);
+            outtake.openGates();
         }
         if (gamepad2.x){
-            leftGate.setPosition(-0.8);
-            rightGate.setPosition(0.45);
+            outtake.closeGates();
             frontFeeder.setPosition(0.5);
             rearFeeder.setPosition(0.5);
         }
 
         if (gamepad1.a){
+            frontLeft.setPower((gamepad1.left_stick_y/2) + (-gamepad1.left_stick_x/2) + (-gamepad1.right_stick_x/2));
+            frontRight.setPower((-gamepad1.left_stick_y/2) + (-gamepad1.left_stick_x/2) + (-gamepad1.right_stick_x/2));
+            rearLeft.setPower((-gamepad1.left_stick_y/2) + (gamepad1.left_stick_x/2) + (-gamepad1.right_stick_x/2));
+            rearRight.setPower((gamepad1.left_stick_y/2) + (gamepad1.left_stick_x/2) + (-gamepad1.right_stick_x/2));
+        }
+        else {
+            frontLeft.setPower((gamepad1.left_stick_y) + (-gamepad1.left_stick_x) + (-gamepad1.right_stick_x));
+            frontRight.setPower((-gamepad1.left_stick_y) + (-gamepad1.left_stick_x) + (-gamepad1.right_stick_x));
+            rearLeft.setPower((-gamepad1.left_stick_y) + (gamepad1.left_stick_x) + (-gamepad1.right_stick_x));
+            rearRight.setPower((gamepad1.left_stick_y) + (gamepad1.left_stick_x) + (-gamepad1.right_stick_x));
 
         }
-
-
-
-        frontLeft.setPower((gamepad1.left_stick_y) + (-gamepad1.right_stick_x) + (-gamepad1.left_stick_x));
-        frontRight.setPower((-gamepad1.left_stick_y) + (-gamepad1.right_stick_x) + (-gamepad1.left_stick_x));
-        rearLeft.setPower((-gamepad1.left_stick_y) + (gamepad1.right_stick_x) + (-gamepad1.left_stick_x));
-        rearRight.setPower((gamepad1.left_stick_y) + (gamepad1.right_stick_x) + (-gamepad1.left_stick_x));
 
 
 
