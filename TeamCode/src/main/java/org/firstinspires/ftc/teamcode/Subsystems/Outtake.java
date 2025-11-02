@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 
 
 
-import com.arcrobotics.ftclib.controller.PIDFController;
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -215,7 +214,7 @@ public class Outtake {
         rightGate.setPosition(0.3);
     }
 
-    public void runFeeder() {
+    public static void runFeeder() {
         frontFeeder.setPosition(-1.0);
     }
     public void openBoot(){
@@ -223,6 +222,9 @@ public class Outtake {
     }
     public void closeBoot(){
         rearFeeder.setPosition(0.3);
+    }
+    public static void stopFeeder(){
+        frontFeeder.setPosition(0);
     }
 
 
