@@ -31,7 +31,7 @@ public class blueLineStartAuton extends OpMode {
 
     private int pathState;
 
-    private final Pose startPose = new Pose(24, 125.8, Math.toRadians(335));
+    private final Pose startPose = new Pose(24, 125.8, Math.toRadians(325));
     private final Pose readyToIntake = new Pose(42.6, 84, Math.toRadians(180));
 
     private final Pose moveToIntake = new Pose(20.5, 84, Math.toRadians(180));
