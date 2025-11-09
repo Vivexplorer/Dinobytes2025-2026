@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp1;
 
 //import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -12,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 
 
+@Disabled
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Initital TeleOp")
 public class TeleOp extends OpMode {
 

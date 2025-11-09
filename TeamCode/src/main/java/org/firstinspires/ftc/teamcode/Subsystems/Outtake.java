@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
@@ -26,11 +27,11 @@ public class Outtake {
 
     public static Servo rightGate;
 
-    public static Servo frontFeeder;
+    public static CRServo frontFeeder;
 
     public static Servo rearFeeder;
 
-    public static double velo = 1695;
+    public static double velo = 1565;
 
 
 
@@ -51,8 +52,7 @@ public class Outtake {
         leftGate = hardwareMap.get(Servo.class, "leftGate");
         rightGate = hardwareMap.get(Servo.class, "rightGate");
         rearFeeder = hardwareMap.get(Servo.class, "rearFeeder");
-        frontFeeder = hardwareMap.get(Servo.class, "frontFeeder");
-        frontFeeder.setDirection(Servo.Direction.REVERSE);
+        frontFeeder = hardwareMap.get(CRServo.class, "frontFeeder");
 
 
         launcher.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -191,32 +191,32 @@ public class Outtake {
     }
 
     public void openLeftGate() {
-        leftGate.setPosition(0.8);
+        leftGate.setPosition(0.5);
     }
 
     public void openRightGate() {
-        rightGate.setPosition(0.4);
+        rightGate.setPosition(0.5);
     }
 
     public void closeLeftGate() {
-        leftGate.setPosition(0.2);
+        leftGate.setPosition(0.3);
     }
 
     public void closeRightGate() {
-        rightGate.setPosition(0.8);
+        rightGate.setPosition(0.7);
     }
 
     public void closeGates() {
-        leftGate.setPosition(0.2);
-        rightGate.setPosition(0.8);
+        leftGate.setPosition(0.3);
+        rightGate.setPosition(0.7);
     }
     public void openGates() {
-        leftGate.setPosition(0.9);
-        rightGate.setPosition(0.3);
+        leftGate.setPosition(0.5);
+        rightGate.setPosition(0.5);
     }
 
     public void runFeeder() {
-        frontFeeder.setPosition(-1.0);
+        frontFeeder.setPower(1.0);
     }
     public void openBoot(){
         rearFeeder.setPosition(1.5);
