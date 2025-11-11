@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.TeleOp1;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -28,7 +29,7 @@ import java.util.concurrent.TimeUnit;
  * This file includes a teleop (driver-controlled) file for the DinoByte! goBILDA® Robot for the
  * 2025-2026 FIRST® Tech Challenge season DECODE™!
  */
-
+@Disabled
 @TeleOp(name = "DecodeDinobyte", group = "StarterBot")
 //@Disabled
 public class DecodeDinobyte extends OpMode {
@@ -118,7 +119,7 @@ public class DecodeDinobyte extends OpMode {
         OFF;
     }
 
-    private enum ElevatorState {
+    enum ElevatorState {
         HIGH,
         LOW;
     }

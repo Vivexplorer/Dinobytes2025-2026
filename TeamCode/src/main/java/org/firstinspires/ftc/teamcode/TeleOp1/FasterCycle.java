@@ -33,16 +33,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
-
 @TeleOp(name = "FasterCycle", group = "StarterBot")
 public class FasterCycle extends OpMode {
 
     final double STOP_SPEED = 0.0;
     final double FULL_SPEED = 1.0;
 
-    final double LAUNCHER_CLOSE_TARGET_VELOCITY = 1662;
-    final double LAUNCHER_CLOSE_MIN_VELOCITY = 1640;
+    final double LAUNCHER_CLOSE_TARGET_VELOCITY = 1670;
+    final double LAUNCHER_CLOSE_MIN_VELOCITY = 1645;
 
     final double LAUNCHER_FAR_TARGET_VELOCITY = 2025;
     final double LAUNCHER_FAR_MIN_VELOCITY = 2000;
@@ -50,10 +48,10 @@ public class FasterCycle extends OpMode {
     double launcherTarget = LAUNCHER_CLOSE_TARGET_VELOCITY;
     double launcherMin = LAUNCHER_CLOSE_MIN_VELOCITY;
 
-    final double RTGATEOPEN_POSITION = 0.3;
-    final double RTGATECLOSE_POSITION = 0.8;
-    final double LFTGATEOPEN_POSITION = 0.9;
-    final double LFTGATECLOSE_POSITION = 0.2;
+    final double RTGATEOPEN_POSITION = 0.15;
+    final double RTGATECLOSE_POSITION = 0.72;
+    final double LFTGATEOPEN_POSITION = 0.45;
+    final double LFTGATECLOSE_POSITION = 0.15;
     final double RRBOOTOPEN_POSITION = 1.4;
     final double RRBOOTCLOSE_POSITION = -0.10;
     private boolean intakeOn = false;
@@ -68,6 +66,8 @@ public class FasterCycle extends OpMode {
 
     ElapsedTime frontFeederTimer = new ElapsedTime();
     ElapsedTime buttonTimer = new ElapsedTime();
+    ElapsedTime thirdBoot = new ElapsedTime();
+    ElapsedTime secondBootBack = new ElapsedTime();
 
     private enum LaunchState {
         IDLE,
@@ -78,6 +78,8 @@ public class FasterCycle extends OpMode {
         RIGHT_LAUNCH,
         RIGHT_BOOT,
         RIGHT_DONE,
+        THIRDBOOT_LAUNCH,
+        THRIDBOOT_DONE,
         STOP
     }
 
@@ -87,12 +89,18 @@ public class FasterCycle extends OpMode {
         CLOSE,
         FAR
     }
+    private enum ElevatorState {
+        HIGH,
+        LOW;
+    }
+    private DecodeDinobyte.ElevatorState elevatorState = DecodeDinobyte.ElevatorState.LOW;
 
     private LauncherDistance launcherDistance = LauncherDistance.CLOSE;
 
     @Override
     public void init() {
-        outtake1 = new Outtake(hardwareMap);
+        Outtake Outtake = new Outtake(hardwareMap);
+
         frontLeft = hardwareMap.get(DcMotor.class, "leftFrontDrive");
         frontRight = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         rearLeft = hardwareMap.get(DcMotor.class, "leftBackDrive");
@@ -154,12 +162,39 @@ public class FasterCycle extends OpMode {
             rightGate.setPosition(RTGATECLOSE_POSITION);
             rearBoot.setPosition(RRBOOTOPEN_POSITION);
             launchState = LaunchState.IDLE;   // reset state
-            Outtake.stopFeeder();            // stop feeder in Outtake1
+            //outtake1.stopFeeder();            // stop feeder in Outtake1
             // stop front feeder CRServo
             buttonTimer.reset();
             frontFeederTimer.reset();
         }
 
+        if (gamepad1.yWasPressed()){
+            switch (elevatorState){
+                case HIGH:
+                    elevatorState = DecodeDinobyte.ElevatorState.LOW;
+                    leftElevator.setPower(0);
+                    rightElevator.setPower(0);
+                    break;
+                case LOW:
+                    elevatorState = DecodeDinobyte.ElevatorState.HIGH;
+                    leftElevator.setPower(1);
+                    rightElevator.setPower(1);
+                    break;
+            }
+        } else if (gamepad1.b) { // Bring down elevator
+            switch (elevatorState){
+                case HIGH:
+                    elevatorState = DecodeDinobyte.ElevatorState.LOW;
+                    leftElevator.setPower(-1);
+                    rightElevator.setPower(-1);
+                    break;
+                case LOW:
+                    elevatorState = DecodeDinobyte.ElevatorState.HIGH;
+                    leftElevator.setPower(0);
+                    rightElevator.setPower(0);
+                    break;
+            }
+        }
         // Intake toggle with 'A'
         if (gamepad2.aWasPressed()) {
             intakeOn = !intakeOn;
@@ -186,6 +221,7 @@ public class FasterCycle extends OpMode {
         telemetry.addData("Launcher Velocity", launcher.getVelocity());
         telemetry.addData("Launch State", launchState);
     }
+
 
 
     void mecanumDrive(double forward, double strafe, double rotate) {
@@ -218,7 +254,7 @@ public class FasterCycle extends OpMode {
                 break;
 
             case LEFT_BOOT:
-                if (buttonTimer.seconds() > 1.75) {
+                if (buttonTimer.seconds() > 2.0) {
                     rearBoot.setPosition(RRBOOTCLOSE_POSITION);
                     launchState = LaunchState.LEFT_DONE;
                     frontFeederTimer.reset();
@@ -256,9 +292,19 @@ public class FasterCycle extends OpMode {
                     rightGate.setPosition(RTGATECLOSE_POSITION);
                     leftGate.setPosition(LFTGATEOPEN_POSITION);
                     rightGate.setPosition(RTGATEOPEN_POSITION);
-                    launchState = LaunchState.IDLE;
-//                    Outtake.stopFeeder();     // stop feeder at end of cycle
+                    //rearBoot.setPosition(RRBOOTOPEN_POSITION);
+                    thirdBoot.reset();
+                    launchState = LaunchState.THIRDBOOT_LAUNCH;
+                    //outtake1.stopFeeder();     // stop feeder at end of cycle
 
+                }
+                break;
+            case THIRDBOOT_LAUNCH:
+                if(thirdBoot.seconds() > 1.5) {
+                    rightGate.setPosition(RTGATECLOSE_POSITION);
+                    leftGate.setPosition(LFTGATEOPEN_POSITION);
+                    buttonTimer.reset();
+                    launchState = LaunchState.IDLE;
                 }
                 break;
 

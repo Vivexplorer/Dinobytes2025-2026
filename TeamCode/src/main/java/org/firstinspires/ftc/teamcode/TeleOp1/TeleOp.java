@@ -7,8 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
-
 
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "Initital TeleOp")
 public class TeleOp extends OpMode {

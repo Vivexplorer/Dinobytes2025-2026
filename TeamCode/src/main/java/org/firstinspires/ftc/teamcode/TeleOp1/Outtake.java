@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Subsystems;
+package org.firstinspires.ftc.teamcode.TeleOp1;
 
 
 
@@ -222,9 +222,6 @@ public class Outtake {
     }
     public void closeBoot(){
         rearFeeder.setPosition(0.3);
-    }
-    public static void stopFeeder(){
-        frontFeeder.setPosition(0);
     }
 
 

@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.TeleOp1.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
-@Autonomous(name = "BlueAuton")
-public class BlueAuton extends OpMode {
+@Autonomous(name = "redLineStartAuton")
+public class redLineStartAuton extends OpMode {
     Intake intake;
 
     Outtake outtake;
@@ -31,21 +31,14 @@ public class BlueAuton extends OpMode {
 
     private int pathState;
 
-    private final Pose startPose = new Pose(41, 9, Math.toRadians(90));
-    private final Pose shootLong = new Pose(64, 15, Math.toRadians(115));
+    private final Pose startPose = new Pose(120, 126, Math.toRadians(216));
+    private final Pose readyToIntake = new Pose(102, 83, Math.toRadians(0));
 
-    private final Pose readyToIntake = new Pose(43, 34, Math.toRadians(180));
+    private final Pose moveToIntake = new Pose(120, 84, Math.toRadians(0));
 
-    private final Pose moveToIntake = new Pose(20.5, 37, Math.toRadians(180));
+    private final Pose moveToCloseScore = new Pose(85, 84, Math.toRadians(45));
 
-
-    private final Pose readyToIntake2 = new Pose(44, 54.5, Math.toRadians(180));
-
-    private final Pose moveToIntake2 = new Pose(20.5,58, Math.toRadians(180));
-
-
-
-    private final Pose moveToCloseScore = new Pose(59, 84, Math.toRadians(135));
+    private final Pose getReadyForTeleOp = new Pose(87,134, Math.toRadians(270));
 
 
 
@@ -53,16 +46,11 @@ public class BlueAuton extends OpMode {
 
     private Path readyToIntakeFirst;
 
-    private Path moveToIntakeSecond;
-
     private Path moveToIntakeFirst;
 
-    private Path readyToIntakeSecond;
-
-
-    private Path moveToScore;
-
     private Path moveToCloseScore1;
+
+    private Path getReadyForTele;
 
     public void autonomousPathUpdate() {
         switch(pathState) {
@@ -145,7 +133,7 @@ public class BlueAuton extends OpMode {
             case 8:
                 if(pathTimer.getElapsedTimeSeconds()>1.5) {
                     follower.setMaxPower(1);
-                    follower.followPath(moveToScore);
+                    follower.followPath(moveToCloseScore1);
                     setPathState(9);
                 }
                 break;
@@ -192,73 +180,13 @@ public class BlueAuton extends OpMode {
                 break;
 
             case 14:
-                if (pathTimer.getElapsedTimeSeconds()>0.75) {
+                if (pathTimer.getElapsedTimeSeconds()>2) {
                     outtake.closeRightGate();
                     outtake.closeLeftGate();
                     outtake.openBoot();
-                    follower.followPath(readyToIntakeSecond);
-                    intake.spinIntake();
+                    follower.followPath(getReadyForTele);
                     setPathState(15);
                 }
-                break;
-            case 15:
-                if (pathTimer.getElapsedTimeSeconds()>1.25) {
-                    follower.setMaxPower(0.3);
-                    follower.followPath(moveToIntakeSecond);
-                    setPathState(16);
-                }
-                break;
-            case 16:
-                if (pathTimer.getElapsedTimeSeconds()>2) {
-                    follower.setMaxPower(1);
-                    follower.followPath(moveToCloseScore1);
-                    setPathState(17);
-                }
-                break;
-            case 17:
-                if(pathTimer.getElapsedTimeSeconds()>2) {
-                    intake.spinIntake();
-                    outtake.runFeeder();
-                    outtake.openLeftGate();
-                    setPathState(18);
-                }
-                break;
-
-            case 18:
-                if (pathTimer.getElapsedTimeSeconds()>2) {
-                    outtake.closeBoot();
-                    setPathState(19);
-                }
-                break;
-
-            case 19:
-                if (pathTimer.getElapsedTimeSeconds()>1) {
-                    outtake.openBoot();
-                    outtake.closeLeftGate();
-                    outtake.closeRightGate();
-                    setPathState(20);
-
-                }
-                break;
-            case 20:
-                if (pathTimer.getElapsedTimeSeconds()>1) {
-                    outtake.openRightGate();
-                    outtake.openLeftGate();
-                    setPathState(21);
-                }
-                break;
-
-            case 21:
-                if (pathTimer.getElapsedTimeSeconds()>1) {
-                    outtake.closeBoot();
-                    setPathState(22);
-                }
-                break;
-
-
-            //shoot the balls
-
-
         }
     }
 
@@ -270,27 +198,21 @@ public class BlueAuton extends OpMode {
 
 
     public void buildPaths() {
-        scorePreload = new Path(new BezierLine(startPose, shootLong));
-        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), shootLong.getHeading());
+        scorePreload = new Path(new BezierLine(startPose, moveToCloseScore));
+        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), moveToCloseScore.getHeading());
 
-        readyToIntakeFirst = new Path(new BezierLine(shootLong, readyToIntake));
-        readyToIntakeFirst.setLinearHeadingInterpolation(shootLong.getHeading(), readyToIntake.getHeading());
+        readyToIntakeFirst = new Path(new BezierLine(moveToCloseScore, readyToIntake));
+        readyToIntakeFirst.setLinearHeadingInterpolation(moveToCloseScore.getHeading(), readyToIntake.getHeading());
 
         moveToIntakeFirst = new Path(new BezierLine(readyToIntake, moveToIntake));
         moveToIntakeFirst.setTangentHeadingInterpolation();
         // moveToIntakeFirst.setVelocityConstraint(0.1); (unnecessary?)
 
-        moveToScore = new Path(new BezierLine(moveToIntake, shootLong));
-        moveToScore.setLinearHeadingInterpolation(moveToIntake.getHeading(), shootLong.getHeading());
+        moveToCloseScore1 = new Path(new BezierLine(moveToIntake, moveToCloseScore));
+        moveToCloseScore1.setLinearHeadingInterpolation(moveToIntake.getHeading(), moveToCloseScore.getHeading());
 
-        readyToIntakeSecond = new Path(new BezierLine(shootLong, readyToIntake2));
-        readyToIntakeSecond.setLinearHeadingInterpolation(shootLong.getHeading(), readyToIntake2.getHeading());
-//
-        moveToIntakeSecond = new Path(new BezierLine(readyToIntake2, moveToIntake2));
-        moveToIntakeSecond.setTangentHeadingInterpolation();
-
-        moveToCloseScore1 = new Path(new BezierLine(moveToIntake2, moveToCloseScore));
-        moveToCloseScore1.setLinearHeadingInterpolation(moveToIntake2.getHeading(), moveToCloseScore.getHeading());
+        getReadyForTele = new Path(new BezierLine(moveToCloseScore, getReadyForTeleOp));
+        getReadyForTele.setLinearHeadingInterpolation(moveToCloseScore.getHeading(), getReadyForTeleOp.getHeading());
     }
 
 

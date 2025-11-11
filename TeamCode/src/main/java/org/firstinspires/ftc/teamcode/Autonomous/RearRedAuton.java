@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Intake;
-import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
+import org.firstinspires.ftc.teamcode.TeleOp1.Intake;
+import org.firstinspires.ftc.teamcode.TeleOp1.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "RearRedAuton")
@@ -31,7 +31,7 @@ public class RearRedAuton extends OpMode {
 
      private int pathState;
 
-    private final Pose startPose = new Pose(108, 9, Math.toRadians(90));
+    private final Pose startPose = new Pose(103, 9, Math.toRadians(90));
      private final Pose shootLong = new Pose(80, 15, Math.toRadians(65));
 
      private final Pose readyToIntake = new Pose(101, 38, Math.toRadians(0));
