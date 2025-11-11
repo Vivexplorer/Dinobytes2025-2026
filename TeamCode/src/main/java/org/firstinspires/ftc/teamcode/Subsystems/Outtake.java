@@ -199,16 +199,16 @@ public class Outtake {
     }
 
     public void closeLeftGate() {
-        leftGate.setPosition(0.3);
+        leftGate.setPosition(0.35);
     }
 
     public void closeRightGate() {
-        rightGate.setPosition(0.7);
+        rightGate.setPosition(0.65);
     }
 
     public void closeGates() {
-        leftGate.setPosition(0.3);
-        rightGate.setPosition(0.7);
+        leftGate.setPosition(0.35);
+        rightGate.setPosition(0.65);
     }
     public void openGates() {
         leftGate.setPosition(0.5);
@@ -219,10 +219,10 @@ public class Outtake {
         frontFeeder.setPower(1.0);
     }
     public void openBoot(){
-        rearFeeder.setPosition(1.5);
+        rearFeeder.setPosition(0.28);
     }
     public void closeBoot(){
-        rearFeeder.setPosition(0.3);
+        rearFeeder.setPosition(1.0);
     }
 
 
