@@ -199,7 +199,7 @@ public class Outtake {
     }
 
     public void closeLeftGate() {
-        leftGate.setPosition(0.35);
+        leftGate.setPosition(0.365);
     }
 
     public void closeRightGate() {
@@ -207,7 +207,7 @@ public class Outtake {
     }
 
     public void closeGates() {
-        leftGate.setPosition(0.35);
+        leftGate.setPosition(0.365);
         rightGate.setPosition(0.65);
     }
     public void openGates() {
@@ -218,6 +218,8 @@ public class Outtake {
     public void runFeeder() {
         frontFeeder.setPower(1.0);
     }
+
+    public void stopFeeder(){frontFeeder.setPower(0.0);}
     public void openBoot(){
         rearFeeder.setPosition(0.28);
     }

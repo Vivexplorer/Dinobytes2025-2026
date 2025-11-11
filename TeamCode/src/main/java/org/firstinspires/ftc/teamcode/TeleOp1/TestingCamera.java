@@ -1,5 +1,3 @@
-package org.firstinspires.ftc.teamcode.TeleOp1;
-
 /*   MIT License
  *   Copyright (c) [2025] [Base 10 Assets, LLC]
  *
@@ -21,6 +19,9 @@ package org.firstinspires.ftc.teamcode.TeleOp1;
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *   SOFTWARE.
  */
+
+package org.firstinspires.ftc.teamcode.TeleOp1;
+
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -101,8 +102,8 @@ public class TestingCamera extends OpMode {
     final double LFTGATEOPEN_POSITION = 0.5; //the open and close position for the gate servos
     final double LFTGATECLOSE_POSITION = 0.3;
 
-    final double RRBOOTOPEN_POSITION = 0.75; //the open and close position for the rear boot servo
-    final double RRBOOTCLOSE_POSITION = 0.0;
+    final double RRBOOTOPEN_POSITION = 0.28; //the open and close position for the rear boot servo
+    final double RRBOOTCLOSE_POSITION = 1.00;
 
     final double LEFT_POSITION = 0.3; //the left and right position for the diverter servo
     final double RIGHT_POSITION = 0.0;
