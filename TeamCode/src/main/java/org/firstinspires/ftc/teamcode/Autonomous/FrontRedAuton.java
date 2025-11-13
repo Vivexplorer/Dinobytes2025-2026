@@ -34,11 +34,11 @@ public class FrontRedAuton extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, shootingTimer;
 
-    private int pathState;
+    private int pathState = -2;
 
     private final Pose startPose = new Pose(120.907, 125.977, Math.toRadians(217));
 
-    private final Pose scoreShort = new Pose(83.7, 81, Math.toRadians(90));
+    private final Pose scoreShort = new Pose(83.7, 81, Math.toRadians(50));
 
 
 
@@ -79,16 +79,16 @@ public class FrontRedAuton extends OpMode {
             //get to correct scanning position
             case -2:
                 follower.followPath(scanAprilTag);
+                cameraSubsystem.cameraLoop();
                 intake.spinIntake();
                 outtake.ShootBallLoop();
-                setPathState(0);
+                setPathState(-1);
                 break;
 
                 //scan the april tag
 
             case -1:
-                if (!follower.isBusy()) {
-                    cameraSubsystem.cameraLoop();
+                if (pathTimer.getElapsedTimeSeconds()>2) {
                     aprilTagID = cameraSubsystem.cameraLoop();
 
                     if (aprilTagID == 21) {
@@ -110,11 +110,12 @@ public class FrontRedAuton extends OpMode {
                     follower.followPath(moveToScore1);
                     setPathState(1);
                 }
+                break;
 
                 //start shooting sequence for april tag id 21
 
             case 1:
-                if(pathTimer.getElapsedTimeSeconds()>0) {
+                if(pathTimer.getElapsedTimeSeconds()>2) {
                     follower.setMaxPower(1);
                     intake.spinIntake();
                     outtake.runFeeder();
@@ -403,13 +404,15 @@ public class FrontRedAuton extends OpMode {
 
             case 50:
                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                    intake.spinIntake();
+                    outtake.runFeeder();
                     follower.followPath(line1readyToIntakePurple);
                     setPathState(51);
                 }
                 break;
 
             case 51:
-                if (!follower.isBusy()) {
+                if (pathTimer.getElapsedTimeSeconds()>1) {
                     follower.setMaxPower(0.3);
                     follower.followPath(line1moveToIntakePurple);
                     setPathState(52);
@@ -417,7 +420,7 @@ public class FrontRedAuton extends OpMode {
                 break;
 
             case 52:
-                if (pathTimer.getElapsedTimeSeconds()>0.5) {
+                if (pathTimer.getElapsedTimeSeconds()>1) {
                     follower.setMaxPower(0.3);
                     follower.followPath(line1moveAwayFromIntakePurple);
                     setPathState(53);
@@ -425,7 +428,7 @@ public class FrontRedAuton extends OpMode {
                 break;
 
             case 53:
-                if (pathTimer.getElapsedTimeSeconds()>0.5) {
+                if (pathTimer.getElapsedTimeSeconds()>3) {
                     follower.setMaxPower(0.3);
                     follower.followPath(line1moveToIntakeGreen);
                     setPathState(54);
@@ -433,8 +436,8 @@ public class FrontRedAuton extends OpMode {
                 break;
 
             case 54:
-                if (pathTimer.getElapsedTimeSeconds()>0.5) {
-                    follower.setMaxPower(0.3);
+                if (pathTimer.getElapsedTimeSeconds()>1) {
+                    follower.setMaxPower(1.0);
                     follower.followPath(moveToScore2);
                     setPathState(55);
                 }
@@ -465,16 +468,16 @@ public class FrontRedAuton extends OpMode {
         line1readyToIntakePurple = new Path(new BezierLine(scoreShort, new Pose(101.4, 79)));
         line1readyToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(50), Math.toRadians(0));
 
-        line1moveToIntakePurple = new Path(new BezierLine(new Pose(101.4,79), new Pose(114.7, 79)));
+        line1moveToIntakePurple = new Path(new BezierLine(new Pose(100,80), new Pose(105, 80)));
         line1moveToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
 
-        line1moveAwayFromIntakePurple = new Path(new BezierLine(new Pose(114.7, 79), new Pose(106.6, 86.3)));
+        line1moveAwayFromIntakePurple = new Path(new BezierLine(new Pose(105, 80), new Pose(100, 86.3)));
         line1moveAwayFromIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
 
-        line1moveToIntakeGreen = new Path(new BezierLine(new Pose(106.6, 86.3), new Pose(124.7, 86.3)));
+        line1moveToIntakeGreen = new Path(new BezierLine(new Pose(100, 86.3), new Pose(126, 86.3)));
         line1moveToIntakeGreen.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
 
-        moveToScore2 = new Path(new BezierCurve(new Pose(126.7, 86.3), new Pose(109.27, 94.2), new Pose(83.3, 80.9)));
+        moveToScore2 = new Path(new BezierCurve(new Pose(126, 86.3), new Pose(109.27, 94.2), new Pose(83.3, 80.9)));
         moveToScore2.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(50));
 
  }
@@ -488,6 +491,7 @@ public class FrontRedAuton extends OpMode {
         autonomousPathUpdate();
 
         telemetry.addData("path state", pathState);
+        telemetry.addData("april tag id: ", aprilTagID);
         telemetry.update();
 
     }
