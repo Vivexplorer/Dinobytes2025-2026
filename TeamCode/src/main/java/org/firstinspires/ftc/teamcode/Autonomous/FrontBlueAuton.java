@@ -17,9 +17,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
-
-@Autonomous(name = "FrontRedAuton")
-public class FrontRedAuton extends OpMode {
+@Autonomous(name = "FrontBlueAuton")
+public class FrontBlueAuton extends OpMode {
     Intake intake;
 
     Outtake outtake;
@@ -36,9 +35,9 @@ public class FrontRedAuton extends OpMode {
 
     private int pathState = -2;
 
-    private final Pose startPose = new Pose(120.907, 125.977, Math.toRadians(217));
+    private final Pose startPose = new Pose(23.093, 125.977, Math.toRadians(323));
 
-    private final Pose scoreShort = new Pose(83.7, 81, Math.toRadians(48));
+    private final Pose scoreShort = new Pose(60.3, 78, Math.toRadians(132));
 
 
 
@@ -85,7 +84,7 @@ public class FrontRedAuton extends OpMode {
                 setPathState(-1);
                 break;
 
-                //scan the april tag
+            //scan the april tag
 
             case -1:
                 if (pathTimer.getElapsedTimeSeconds()>2) {
@@ -107,7 +106,7 @@ public class FrontRedAuton extends OpMode {
                 break;
 
 
-                //start shooting sequence for april tag id 21
+            //start shooting sequence for april tag id 21
 
             case 1:
                 if(pathTimer.getElapsedTimeSeconds()>0.5) {
@@ -299,7 +298,7 @@ public class FrontRedAuton extends OpMode {
                 }
                 break;
 
-                //shooting sequence when tag id is 23
+            //shooting sequence when tag id is 23
 
             case 29:
                 if(pathTimer.getElapsedTimeSeconds()>0) {
@@ -395,10 +394,10 @@ public class FrontRedAuton extends OpMode {
                 }
                 break;
 
-                //start intaking sequence
+            //start intaking sequence
 
             case 50:
-                if (pathTimer.getElapsedTimeSeconds()>1) {
+                if (pathTimer.getElapsedTimeSeconds()>0.75) {
                     intake.spinIntake();
                     outtake.runFeeder();
                     follower.followPath(line1readyToIntakePurple);
@@ -407,7 +406,7 @@ public class FrontRedAuton extends OpMode {
                 break;
 
             case 51:
-                if (pathTimer.getElapsedTimeSeconds()>1) {
+                if (pathTimer.getElapsedTimeSeconds()>0.5) {
                     follower.setMaxPower(0.2);
                     follower.followPath(line1moveToIntakePurple);
                     setPathState(52);
@@ -415,7 +414,7 @@ public class FrontRedAuton extends OpMode {
                 break;
 
             case 52:
-                if (pathTimer.getElapsedTimeSeconds()>1.5) {
+                if (pathTimer.getElapsedTimeSeconds()>2.5) {
                     follower.setMaxPower(0.3);
                     follower.followPath(line1moveAwayFromIntakePurple);
                     setPathState(53);
@@ -423,7 +422,7 @@ public class FrontRedAuton extends OpMode {
                 break;
 
             case 53:
-                if (pathTimer.getElapsedTimeSeconds()>3) {
+                if (pathTimer.getElapsedTimeSeconds()>1.5) {
                     follower.setMaxPower(0.3);
                     follower.followPath(line1moveToIntakeGreen);
                     setPathState(54);
@@ -439,7 +438,7 @@ public class FrontRedAuton extends OpMode {
                 break;
 
             case 55:
-                if (pathTimer.getElapsedTimeSeconds()>1.5) {
+                if (pathTimer.getElapsedTimeSeconds()>1) {
                     if (aprilTagID == 21) {
                         setPathState(1);
                     } else if (aprilTagID == 22) {
@@ -467,28 +466,28 @@ public class FrontRedAuton extends OpMode {
 
 
     public void buildPaths() {
-        scanAprilTag = new Path(new BezierCurve(startPose, new Pose(100.63, 84.86), new Pose(87.3, 84.9)));
+        scanAprilTag = new Path(new BezierCurve(startPose, new Pose(43.37, 84.86), new Pose(56.7, 84.9)));
         scanAprilTag.setLinearHeadingInterpolation(startPose.getHeading(), Math.toRadians(90));
 
-        moveToScore1 = new Path(new BezierLine(new Pose(87.3, 84.9), scoreShort));
+        moveToScore1 = new Path(new BezierLine(new Pose(56.7, 78), scoreShort));
         moveToScore1.setLinearHeadingInterpolation(Math.toRadians(90), scoreShort.getHeading());
 
-        line1readyToIntakePurple = new Path(new BezierLine(scoreShort, new Pose(100, 84)));
-        line1readyToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(48), Math.toRadians(0));
+        line1readyToIntakePurple = new Path(new BezierLine(scoreShort, new Pose(44, 78)));
+        line1readyToIntakePurple.setLinearHeadingInterpolation(scoreShort.getHeading(), Math.toRadians(180));
 
-        line1moveToIntakePurple = new Path(new BezierLine(new Pose(100,84), new Pose(118, 84)));
-        line1moveToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
+        line1moveToIntakePurple = new Path(new BezierLine(new Pose(44,78), new Pose(30, 78)));
+        line1moveToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180));
 
-        line1moveAwayFromIntakePurple = new Path(new BezierLine(new Pose(118, 84), new Pose(110, 78)));
-        line1moveAwayFromIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
+        line1moveAwayFromIntakePurple = new Path(new BezierLine(new Pose(30, 78), new Pose(35, 84)));
+        line1moveAwayFromIntakePurple.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180));
 
-        line1moveToIntakeGreen = new Path(new BezierLine(new Pose(110, 78), new Pose(120, 78)));
-        line1moveToIntakeGreen.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
+        line1moveToIntakeGreen = new Path(new BezierLine(new Pose(35, 84), new Pose(24, 84)));
+        line1moveToIntakeGreen.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180));
 
-        moveToScore2 = new Path(new BezierCurve(new Pose(120, 78), new Pose(109.27, 94.2), scoreShort));
-        moveToScore2.setLinearHeadingInterpolation(Math.toRadians(0), scoreShort.getHeading());
+        moveToScore2 = new Path(new BezierCurve(new Pose(24, 84), new Pose(53.27, 94.2), scoreShort));
+        moveToScore2.setLinearHeadingInterpolation(Math.toRadians(180), scoreShort.getHeading());
 
- }
+    }
 
 
     @Override
@@ -547,3 +546,5 @@ public class FrontRedAuton extends OpMode {
 
     }
 }
+
+

@@ -391,7 +391,7 @@ public class RearRedAuton extends OpMode {
              case 50:
                  if (pathTimer.getElapsedTimeSeconds()>1) {
                      Outtake.leftGate.setPosition(0.35);
-                     Outtake.rightGate.setPosition(0.65);
+                     Outtake.rightGate.setPosition(0.7);
                      intake.intake.setPower(0.75);
                      follower.setMaxPower(1);
                      follower.followPath(readyToIntakeFirst);

@@ -72,25 +72,27 @@ public class RearBlueAuton extends OpMode {
             case 0:
                 cameraSubsystem.cameraLoop();
                 aprilTagID = cameraSubsystem.cameraLoop();
-                follower.setMaxPower(0.1);
+                follower.setMaxPower(0.4);
                 follower.followPath(scorePreload);
                 outtake.ShootBallLoop();
 
                 if (aprilTagID == 21) {
                     setPathState(1);
+
                 } else if (aprilTagID == 22) {
                     setPathState(15);
+
                 } else if (aprilTagID == 23) {
                     setPathState(29);
-                } else {
-                    setPathState(0);
                 }
                 break;
+
 
             //start shooting sequence
 
             case 1:
                 if(pathTimer.getElapsedTimeSeconds()>0) {
+
                     follower.setMaxPower(1);
                     intake.spinIntake();
                     outtake.runFeeder();
@@ -731,6 +733,7 @@ public class RearBlueAuton extends OpMode {
         autonomousPathUpdate();
 
         telemetry.addData("path state", pathState);
+        telemetry.addData("april tag id", aprilTagID);
         telemetry.update();
 
     }
