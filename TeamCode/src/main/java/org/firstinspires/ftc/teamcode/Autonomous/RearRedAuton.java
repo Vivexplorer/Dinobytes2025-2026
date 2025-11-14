@@ -104,7 +104,7 @@ public class RearRedAuton extends OpMode {
 
              case 100:
                  if (launcher.getVelocity()>1500) {
-                     outtake.openLeftGate();
+                     Outtake.leftGate.setPosition(0.6);
                      setPathState(2);
                  }
                  break;
@@ -390,8 +390,8 @@ public class RearRedAuton extends OpMode {
 
              case 50:
                  if (pathTimer.getElapsedTimeSeconds()>1) {
-                     Outtake.leftGate.setPosition(0.25);
-                     Outtake.rightGate.setPosition(0.75);
+                     Outtake.leftGate.setPosition(0.35);
+                     Outtake.rightGate.setPosition(0.65);
                      intake.intake.setPower(0.75);
                      follower.setMaxPower(1);
                      follower.followPath(readyToIntakeFirst);
