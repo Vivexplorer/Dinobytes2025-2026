@@ -399,6 +399,8 @@ public class FrontRedAuton extends OpMode {
 
             case 50:
                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                    outtake.closeLeftGate();
+                    outtake.closeRightGate();
                     intake.spinIntake();
                     outtake.runFeeder();
                     follower.followPath(line1readyToIntakePurple);
@@ -473,13 +475,13 @@ public class FrontRedAuton extends OpMode {
         moveToScore1 = new Path(new BezierLine(new Pose(87.3, 84.9), scoreShort));
         moveToScore1.setLinearHeadingInterpolation(Math.toRadians(90), scoreShort.getHeading());
 
-        line1readyToIntakePurple = new Path(new BezierLine(scoreShort, new Pose(100, 84)));
+        line1readyToIntakePurple = new Path(new BezierLine(scoreShort, new Pose(95, 84)));
         line1readyToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(48), Math.toRadians(0));
 
-        line1moveToIntakePurple = new Path(new BezierLine(new Pose(100,84), new Pose(118, 84)));
+        line1moveToIntakePurple = new Path(new BezierLine(new Pose(95,84), new Pose(115, 84)));
         line1moveToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
 
-        line1moveAwayFromIntakePurple = new Path(new BezierLine(new Pose(118, 84), new Pose(110, 78)));
+        line1moveAwayFromIntakePurple = new Path(new BezierLine(new Pose(115, 84), new Pose(110, 78)));
         line1moveAwayFromIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
 
         line1moveToIntakeGreen = new Path(new BezierLine(new Pose(110, 78), new Pose(120, 78)));

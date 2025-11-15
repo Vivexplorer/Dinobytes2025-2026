@@ -199,7 +199,7 @@ public class Outtake {
     }
 
     public void closeLeftGate() {
-        leftGate.setPosition(0.38);
+        leftGate.setPosition(0.34);
     }
 
     public void closeRightGate() {

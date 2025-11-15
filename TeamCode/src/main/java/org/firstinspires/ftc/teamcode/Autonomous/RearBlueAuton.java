@@ -37,7 +37,7 @@ public class RearBlueAuton extends OpMode {
     private final Pose startPose = new Pose(47, 9, Math.toRadians(90));
     private final Pose shootLong = new Pose(58.5, 15, Math.toRadians(110.5));
 
-    private final Pose readyToIntake = new Pose(47, 31.5, Math.toRadians(180));
+    private final Pose readyToIntake = new Pose(47, 36, Math.toRadians(180));
 
 
 
@@ -47,6 +47,7 @@ public class RearBlueAuton extends OpMode {
     int aprilTagID = -1;
 
 
+    private Path turn;
 
     private Path scorePreload;
 
@@ -62,6 +63,10 @@ public class RearBlueAuton extends OpMode {
 
     private Path line1moveToScore;
 
+    private Path moveOutOfScore;
+
+    int counter = 0;
+
 
 
 
@@ -69,31 +74,44 @@ public class RearBlueAuton extends OpMode {
     public void autonomousPathUpdate() {
         switch(pathState) {
             //score the preload
-            case 0:
-                cameraSubsystem.cameraLoop();
-                aprilTagID = cameraSubsystem.cameraLoop();
-                follower.setMaxPower(0.4);
-                follower.followPath(scorePreload);
-                outtake.ShootBallLoop();
-
-                if (aprilTagID == 21) {
-                    setPathState(1);
-
-                } else if (aprilTagID == 22) {
-                    setPathState(15);
-
-                } else if (aprilTagID == 23) {
-                    setPathState(29);
-                }
+            case -1:
+                follower.followPath(turn);
+                setPathState(0);
                 break;
+
+            case 0:
+                if (!follower.isBusy()) {
+                    cameraSubsystem.cameraLoop();
+                    aprilTagID = cameraSubsystem.cameraLoop();
+                    follower.setMaxPower(0.1);
+                    follower.followPath(scorePreload);
+
+                    outtake.launcher.setVelocity(1565);
+
+                    if (aprilTagID == 21) {
+                        counter = 1;
+                        setPathState(1);
+                    } else if (aprilTagID == 22) {
+                        counter = 1;
+                        setPathState(15);
+                    } else if (aprilTagID == 23) {
+                        counter = 1;
+                        setPathState(29);
+                    } else {
+                        setPathState(15);
+                    }
+                }
+            break;
+
 
 
             //start shooting sequence
 
             case 1:
-                if(pathTimer.getElapsedTimeSeconds()>0) {
-
+                if(pathTimer.getElapsedTimeSeconds()>0.1) {
                     follower.setMaxPower(1);
+
+
                     intake.spinIntake();
                     outtake.runFeeder();
                     setPathState(100);
@@ -125,7 +143,11 @@ public class RearBlueAuton extends OpMode {
             case 4:
                 if (pathTimer.getElapsedTimeSeconds()>0.75) {
                     outtake.openBoot();
-                    setPathState(5);
+                    if (counter == 2) {
+                        setPathState(100000);
+                    } else {
+                        setPathState(5);
+                    }
                 }
                 break;
 
@@ -196,8 +218,9 @@ public class RearBlueAuton extends OpMode {
 
 
             case 15:
-                if(pathTimer.getElapsedTimeSeconds()>0) {
+                if(pathTimer.getElapsedTimeSeconds()>0.1) {
                     follower.setMaxPower(1);
+
                     intake.spinIntake();
                     outtake.runFeeder();
                     setPathState(16);
@@ -229,7 +252,12 @@ public class RearBlueAuton extends OpMode {
             case 19:
                 if (pathTimer.getElapsedTimeSeconds()>0.75) {
                     outtake.openBoot();
-                    setPathState(20);
+                    if (counter == 2) {
+                        setPathState(100000);
+                    } else {
+                        setPathState(20);
+                    }
+
                 }
                 break;
 
@@ -292,8 +320,10 @@ public class RearBlueAuton extends OpMode {
             //23 shooting pattern
 
             case 29:
-                if(pathTimer.getElapsedTimeSeconds()>0) {
+                if(pathTimer.getElapsedTimeSeconds()>0.1) {
                     follower.setMaxPower(1);
+
+
                     intake.spinIntake();
                     outtake.runFeeder();
                     setPathState(30);
@@ -325,7 +355,13 @@ public class RearBlueAuton extends OpMode {
             case 33:
                 if (pathTimer.getElapsedTimeSeconds()>0.75) {
                     outtake.openBoot();
-                    setPathState(34);
+                    if (counter == 2) {
+                        setPathState(100000);
+                    } else {
+                        setPathState(34);
+                    }
+
+
                 }
                 break;
 
@@ -445,226 +481,28 @@ public class RearBlueAuton extends OpMode {
                     outtake.ShootBallLoop();
 
                     if (aprilTagID == 21) {
+                        counter = 2;
                         setPathState(1);
                     } else if (aprilTagID == 22) {
+                        counter = 2;
                         setPathState(15);
                     } else if (aprilTagID == 23) {
+                        counter = 2;
                         setPathState(29);
                     } else {
-                        setPathState(0);
+                        counter = 2;
+                        setPathState(15);
                     }
                 }
                 break;
 
+            case 100000:
+                if (pathTimer.getElapsedTimeSeconds()>0.01) {
+                    follower.followPath(moveOutOfScore);
+                    setPathState(100001);
+                }
+                break;
 
-
-
-
-
-
-
-//             case 51:
-//                 if (!follower.isBusy()) {
-//                     follower.setMaxPower(0.3);
-//                     follower.followPath(moveToIntakeFirst);
-//                     setPathState(52);
-//                 }
-//                 break;
-//
-//             case 52:
-//                 if (pathTimer.getElapsedTimeSeconds()>1.5) {
-//                     follower.setMaxPower(0.3);
-//                     follower.followPath(moveToIntakePurple);
-//                     setPathState(53);
-//                 }
-//
-//             case 53:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                     follower.setMaxPower(0.3);
-//                     follower.followPath(moveToIntakeBothPurple);
-//                     setPathState(54);
-//                 }
-
-
-
-
-
-
-
-
-//                 //shoot first ball
-//
-//             case 2:
-//                 if (pathTimer.getElapsedTimeSeconds()>2) {
-//                     outtake.closeBoot();
-//                     setPathState(3);
-//                 }
-//                 break;
-//
-//                 //start shooting sequence
-
-//             case 3:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                    outtake.openBoot();
-//                    outtake.closeLeftGate();
-//                    outtake.closeRightGate();
-//                    setPathState(4);
-//
-//                 }
-//                 break;
-//
-//
-//             case 4:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                     outtake.openRightGate();
-//                     outtake.openLeftGate();
-//                     setPathState(5);
-//                 }
-//                 break;
-//
-//                 //shoot second ball
-//
-//             case 5:
-//                 if (pathTimer.getElapsedTimeSeconds()>1.75) {
-//                     outtake.closeBoot();
-//                     setPathState(6);
-//                 }
-//                 break;
-//
-//             case 6:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                     outtake.closeRightGate();
-//                     outtake.closeLeftGate();
-//                     outtake.openBoot();
-//                     follower.followPath(readyToIntakeFirst);
-//                     intake.spinIntake();
-//                     setPathState(7);
-//                 }
-//                 break;
-//
-//             case 7:
-//                 if (pathTimer.getElapsedTimeSeconds()>2) {
-//                     follower.setMaxPower(0.3);
-//                     follower.followPath(moveToIntakeFirst);
-//                     setPathState(8);
-//                 }
-//                 break;
-//
-//             case 8:
-//                 if(pathTimer.getElapsedTimeSeconds()>1.5) {
-//                     follower.setMaxPower(1);
-//                     follower.followPath(moveToScore);
-//                     setPathState(9);
-//                 }
-//                 break;
-//
-//
-//             case 9:
-//                 if(pathTimer.getElapsedTimeSeconds()>1.5) {
-//                     intake.spinIntake();
-//                     outtake.runFeeder();
-//                     outtake.openLeftGate();
-//                     setPathState(10);
-//                 }
-//                 break;
-//
-//             case 10:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                     outtake.closeBoot();
-//                     setPathState(11);
-//                 }
-//                 break;
-//
-//             case 11:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                     outtake.openBoot();
-//                     outtake.closeLeftGate();
-//                     outtake.closeRightGate();
-//                     setPathState(12);
-//
-//                 }
-//                 break;
-//             case 12:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                     outtake.openRightGate();
-//                     outtake.openLeftGate();
-//                     setPathState(13);
-//                 }
-//                 break;
-//
-//             case 13:
-//                 if (pathTimer.getElapsedTimeSeconds()>2) {
-//                     outtake.closeBoot();
-//                     setPathState(14);
-//                 }
-//                 break;
-//
-//             case 14:
-//                 if (pathTimer.getElapsedTimeSeconds()>0.75) {
-//                     outtake.closeRightGate();
-//                     outtake.closeLeftGate();
-//                     outtake.openBoot();
-//                     follower.followPath(readyToIntakeSecond);
-//                     intake.spinIntake();
-//                     setPathState(15);
-//                 }
-//                 break;
-//             case 15:
-//                 if (pathTimer.getElapsedTimeSeconds()>1.25) {
-//                     follower.setMaxPower(0.3);
-//                     follower.followPath(moveToIntakeSecond);
-//                     setPathState(16);
-//                 }
-//                 break;
-//             case 16:
-//                 if (pathTimer.getElapsedTimeSeconds()>2) {
-//                     follower.setMaxPower(1);
-//                     follower.followPath(moveToCloseScore1);
-//                     setPathState(17);
-//                 }
-//                 break;
-//             case 17:
-//                 if(pathTimer.getElapsedTimeSeconds()>2) {
-//                     intake.spinIntake();
-//                     outtake.runFeeder();
-//                     outtake.openLeftGate();
-//                     setPathState(18);
-//                 }
-//                 break;
-//
-//             case 18:
-//                 if (pathTimer.getElapsedTimeSeconds()>2) {
-//                     outtake.closeBoot();
-//                     setPathState(19);
-//                 }
-//                 break;
-//
-//             case 19:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                     outtake.openBoot();
-//                     outtake.closeLeftGate();
-//                     outtake.closeRightGate();
-//                     setPathState(20);
-//
-//                 }
-//                 break;
-//             case 20:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                     outtake.openRightGate();
-//                     outtake.openLeftGate();
-//                     setPathState(21);
-//                 }
-//                 break;
-//
-//             case 21:
-//                 if (pathTimer.getElapsedTimeSeconds()>1) {
-//                     outtake.closeBoot();
-//                     setPathState(22);
-//                 }
-//                 break;
-//
-//
-//                 //shoot the balls
 
 
         }
@@ -678,16 +516,20 @@ public class RearBlueAuton extends OpMode {
 
 
     public void buildPaths() {
-        scorePreload = new Path(new BezierLine(startPose, shootLong));
-        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), shootLong.getHeading());
 
-        readyToIntakeFirst = new Path(new BezierLine(shootLong, readyToIntake));
+        turn = new Path(new BezierLine(startPose, startPose));
+        turn.setLinearHeadingInterpolation(startPose.getHeading(), Math.toRadians(80));
+
+        scorePreload = new Path(new BezierLine(startPose, shootLong));
+        scorePreload.setLinearHeadingInterpolation(Math.toRadians(80), shootLong.getHeading());
+
+        readyToIntakeFirst = new Path(new BezierLine(shootLong, new Pose(readyToIntake.getX()+4, readyToIntake.getY())));
         readyToIntakeFirst.setLinearHeadingInterpolation(shootLong.getHeading(), readyToIntake.getHeading());
 
-        line1IntakeGreen = new Path(new BezierLine(readyToIntake, new Pose(40.5,36)));
+        line1IntakeGreen = new Path(new BezierLine(new Pose(readyToIntake.getX()+4, readyToIntake.getY()), new Pose(38,36)));
         line1IntakeGreen.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180));
 
-        line1moveAwayFromIntakeGreen = new Path(new BezierLine(new Pose(40.5,36), new Pose(42,36)));
+        line1moveAwayFromIntakeGreen = new Path(new BezierLine(new Pose(38,36), new Pose(42,36)));
         line1moveAwayFromIntakeGreen.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180));
 
         line1readyToIntakePurple = new Path(new BezierLine(new Pose(42,36), new Pose(42, 31)));
@@ -698,6 +540,9 @@ public class RearBlueAuton extends OpMode {
 
         line1moveToScore = new Path(new BezierCurve(new Pose(22,31), new Pose(37, 26.5), shootLong));
         line1moveToScore.setLinearHeadingInterpolation(Math.toRadians(180), shootLong.getHeading());
+
+        moveOutOfScore = new Path(new BezierLine(shootLong, new Pose(shootLong.getX()-7, shootLong.getY()+8)));
+        moveOutOfScore.setLinearHeadingInterpolation(shootLong.getHeading(), Math.toRadians(90));
 
 
 
