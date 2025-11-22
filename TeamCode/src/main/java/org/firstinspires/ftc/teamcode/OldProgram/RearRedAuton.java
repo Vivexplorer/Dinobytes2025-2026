@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Autonomous;
+package org.firstinspires.ftc.teamcode.OldProgram;
 
 
 import com.pedropathing.follower.Follower;
@@ -8,18 +8,18 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.Subsystems.Camera;
 import org.firstinspires.ftc.teamcode.Subsystems.CameraSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake;
+import org.firstinspires.ftc.teamcode.Subsystems.LauncherPID;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.opencv.core.Mat;
 
+@Disabled
 @Autonomous(name = "RearRedAuton")
 public class RearRedAuton extends OpMode {
     Intake intake;
@@ -32,6 +32,8 @@ public class RearRedAuton extends OpMode {
 
     DcMotorEx launcher;
 
+    LauncherPID launcherPID;
+
     Servo leftGate, rightGate, rearFeeder, frontFeeder;
      private Follower follower;
      private Timer pathTimer, actionTimer, opmodeTimer, shootingTimer;
@@ -42,6 +44,8 @@ public class RearRedAuton extends OpMode {
      private final Pose shootLong = new Pose(85.5, 15, Math.toRadians(69.5));
 
      private final Pose readyToIntake = new Pose(97, 33, Math.toRadians(0));
+
+
 
      int counter = 0;
 
@@ -60,11 +64,7 @@ public class RearRedAuton extends OpMode {
 
      private Path line1IntakeGreen;
 
-     private Path line1moveAwayFromIntakeGreen;
 
-     private Path line1readyToIntakePurple;
-
-     private Path line1moveToIntakePurple;
 
      private Path line1moveToScore;
 
@@ -82,7 +82,7 @@ public class RearRedAuton extends OpMode {
                  aprilTagID = cameraSubsystem.cameraLoop();
                  follower.setMaxPower(0.1);
                  follower.followPath(scorePreload);
-                 outtake.ShootBallLoop();
+                 launcherPID.StartShooter();
 
                  if (aprilTagID == 21) {
                      setPathState(1);
@@ -113,7 +113,7 @@ public class RearRedAuton extends OpMode {
                  break;
 
              case 100:
-                 if (launcher.getVelocity()>1500) {
+                 if (launcherPID.launcher.getVelocity()<-1450) {
                      Outtake.leftGate.setPosition(0.6);
                      setPathState(2);
                  }
@@ -168,7 +168,7 @@ public class RearRedAuton extends OpMode {
                  break;
 
              case 8:
-                 if (pathTimer.getElapsedTimeSeconds()>0) {
+                 if (pathTimer.getElapsedTimeSeconds()>0.7) {
                      outtake.openBoot();
                      if (counter == 2) {
                          setPathState(1000000);
@@ -228,7 +228,7 @@ public class RearRedAuton extends OpMode {
                  break;
 
              case 16:
-                 if (launcher.getVelocity()>1500) {
+                 if (launcherPID.launcher.getVelocity()<-1450) {
                      Outtake.leftGate.setPosition(0.38);
                      outtake.openRightGate();
                      setPathState(17);
@@ -340,7 +340,7 @@ public class RearRedAuton extends OpMode {
                  break;
 
              case 30:
-                 if (launcher.getVelocity()>1500) {
+                 if (launcherPID.launcher.getVelocity()<-1450) {
                      Outtake.leftGate.setPosition(0.38);
                      outtake.openRightGate();
                      setPathState(31);
@@ -432,7 +432,7 @@ public class RearRedAuton extends OpMode {
 
              case 41:
                  if(pathTimer.getElapsedTimeSeconds()>1) {
-                     launcher.setVelocity(1000);
+                     launcherPID.StopShooter();
                      outtake.openBoot();
                      setPathState(50);
                  }
@@ -441,7 +441,7 @@ public class RearRedAuton extends OpMode {
                  //start intaking sequence
 
              case 50:
-                 if (pathTimer.getElapsedTimeSeconds()>1) {
+                 if (pathTimer.getElapsedTimeSeconds()>3) {
                      Outtake.leftGate.setPosition(0.35);
                      Outtake.rightGate.setPosition(0.7);
                      intake.intake.setPower(0.75);
@@ -452,36 +452,14 @@ public class RearRedAuton extends OpMode {
                  break;
 
              case 51:
-                 if (!follower.isBusy()) {
+                 if (pathTimer.getElapsedTimeSeconds()>1) {
                      follower.setMaxPower(0.28);
                      follower.followPath(line1IntakeGreen);
-                     setPathState(52);
-                 }
-                 break;
-
-             case 52:
-                 if (!follower.isBusy()) {
-                     follower.setMaxPower(0.28);
-                     follower.followPath(line1moveAwayFromIntakeGreen);
-                     setPathState(53);
-                 }
-                 break;
-
-             case 53:
-                 if (!follower.isBusy()) {
-                     follower.setMaxPower(0.28);
-                     follower.followPath(line1readyToIntakePurple);
-                     setPathState(54);
-                 }
-                 break;
-
-             case 54:
-                 if (!follower.isBusy()) {
-                     follower.setMaxPower(0.2);
-                     follower.followPath(line1moveToIntakePurple);
                      setPathState(55);
                  }
                  break;
+
+
 
              case 55:
                  if (!follower.isBusy()) {
@@ -491,11 +469,17 @@ public class RearRedAuton extends OpMode {
                  }
                  break;
 
+             case 200:
+                 if (pathTimer.getElapsedTimeSeconds()>2) {
+                     outtake.ShootBallLoop();
+                     setPathState(56);
+                 }
+
              case 56:
 
-                 if (!follower.isBusy()) {
+                 if (launcherPID.launcher.getVelocity()<-1450) {
 
-                     outtake.ShootBallLoop();
+
 
                      if (aprilTagID == 21) {
                          counter = 2;
@@ -521,6 +505,7 @@ public class RearRedAuton extends OpMode {
                      follower.followPath(moveOutOfScore);
                          setPathState(1000001);
                  }
+                 break;
 
 
 
@@ -751,19 +736,19 @@ public class RearRedAuton extends OpMode {
          readyToIntakeFirst = new Path(new BezierLine(shootLong, readyToIntake));
          readyToIntakeFirst.setLinearHeadingInterpolation(shootLong.getHeading(), readyToIntake.getHeading());
 
-         line1IntakeGreen = new Path(new BezierLine(readyToIntake, new Pose(103.5,33)));
+         line1IntakeGreen = new Path(new BezierLine(readyToIntake, new Pose(130,33)));
          line1IntakeGreen.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
 
-         line1moveAwayFromIntakeGreen = new Path(new BezierLine(new Pose(103.5,31), new Pose(102,31)));
-         line1moveAwayFromIntakeGreen.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
+//         line1moveAwayFromIntakeGreen = new Path(new BezierLine(new Pose(103.5,31), new Pose(102,31)));
+//         line1moveAwayFromIntakeGreen.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
+//
+//         line1readyToIntakePurple = new Path(new BezierLine(new Pose(102,31), new Pose(102, 36)));
+//         line1readyToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
 
-         line1readyToIntakePurple = new Path(new BezierLine(new Pose(102,31), new Pose(102, 36)));
-         line1readyToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
+//         line1moveToIntakePurple = new Path(new BezierLine(new Pose(102, 36), new Pose(122, 36)));
+//         line1moveToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
 
-         line1moveToIntakePurple = new Path(new BezierLine(new Pose(102, 36), new Pose(122, 36)));
-         line1moveToIntakePurple.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
-
-         line1moveToScore = new Path(new BezierCurve(new Pose(118,36), new Pose(107, 26.5), shootLong));
+         line1moveToScore = new Path(new BezierCurve(new Pose(120,33), new Pose(107, 26.5), shootLong));
          line1moveToScore.setLinearHeadingInterpolation(Math.toRadians(0), shootLong.getHeading());
 
          moveOutOfScore = new Path(new BezierLine(shootLong, new Pose(shootLong.getX()+5, shootLong.getY()+8)));
@@ -797,6 +782,7 @@ public class RearRedAuton extends OpMode {
 
      @Override
      public void loop() {
+         launcherPID.shooterLoop();
 
          cameraSubsystem.cameraLoop();
          follower.update();
@@ -814,8 +800,10 @@ public class RearRedAuton extends OpMode {
          opmodeTimer.resetTimer();
 
          outtake = new Outtake(hardwareMap);
+         launcherPID = new LauncherPID(hardwareMap);
          intake = new Intake(hardwareMap);
          cameraSubsystem = new CameraSubsystem(hardwareMap);
+
 
 
 
@@ -824,9 +812,10 @@ public class RearRedAuton extends OpMode {
          buildPaths();
          follower.setStartingPose(startPose);
 
-         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
 
-         leftGate = hardwareMap.get(Servo.class, "leftGate");
+
+
+        leftGate = hardwareMap.get(Servo.class, "leftGate");
          rightGate = hardwareMap.get(Servo.class, "rightGate");
 
         outtake.closeGates();

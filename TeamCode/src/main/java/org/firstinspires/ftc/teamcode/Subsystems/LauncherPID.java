@@ -1,68 +1,39 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
-
-
-import static org.firstinspires.ftc.teamcode.Subsystems.LauncherPID.d;
-import static org.firstinspires.ftc.teamcode.Subsystems.LauncherPID.f;
-import static org.firstinspires.ftc.teamcode.Subsystems.LauncherPID.i;
-import static org.firstinspires.ftc.teamcode.Subsystems.LauncherPID.p;
-
-import com.arcrobotics.ftclib.controller.PIDFController;
 import com.bylazar.configurables.annotations.Configurable;
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Configurable
-public class Outtake {
-    public  DcMotorEx launcher;
+public class LauncherPID  {
 
-    HardwareMap hardwareMap;
+    public DcMotorEx launcher;
+
+    public static double p = 915, i = 0, d = 40, f = 41;
+
+    public static int velocity;
+
+    public int currentVelo;
 
     Telemetry telemetry;
 
-    public static Servo leftGate;
-
-    public static Servo rightGate;
-
-    public static CRServo frontFeeder;
-
-    public static Servo rearFeeder;
-
-    public static double velo = 1515;
+    HardwareMap hardwareMap;
 
 
 
 
-
-
-    public static double velocityWanted;
-
-
-
-
-    public Outtake(HardwareMap hardwareMap) {
+    public LauncherPID (HardwareMap hardwareMap) {
         this.hardwareMap = hardwareMap;
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         launcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        launcher.setVelocityPIDFCoefficients(900, 0, 40, 41);
-
-        leftGate = hardwareMap.get(Servo.class, "leftGate");
-        rightGate = hardwareMap.get(Servo.class, "rightGate");
-        rearFeeder = hardwareMap.get(Servo.class, "rearFeeder");
-        frontFeeder = hardwareMap.get(CRServo.class, "frontFeeder");
-
-
-
 
         telemetry = new Telemetry() {
             @Override
@@ -191,59 +162,33 @@ public class Outtake {
             }
         };
 
-
-
-    }
-
-    public void openLeftGate() {
-        leftGate.setPosition(0.6);
-    }
-
-    public void openRightGate() {
-        rightGate.setPosition(0.5);
-    }
-
-    public void closeLeftGate() {
-        leftGate.setPosition(0.34);
-    }
-
-    public void closeRightGate() {
-        rightGate.setPosition(0.7);
-    }
-
-    public void closeGates() {
-        leftGate.setPosition(0.38);
-        rightGate.setPosition(0.7);
-    }
-    public void openGates() {
-        leftGate.setPosition(0.6);
-        rightGate.setPosition(0.5);
-    }
-
-    public void runFeeder() {
-        frontFeeder.setPower(1.0);
-    }
-
-    public void stopFeeder(){frontFeeder.setPower(0.0);}
-    public void openBoot(){
-        rearFeeder.setPosition(0.28);
-    }
-    public void closeBoot(){
-        rearFeeder.setPosition(1.0);
-    }
-
-
-
-
-
-    public void ShootBallLoop() {
         launcher.setVelocityPIDFCoefficients(p, i, d, f);
+        velocity = -1565;
 
-        launcher.setVelocity(-1515);
+
     }
 
-    public void StopBallLoop() {
+    public void shooterLoop() {
         launcher.setVelocityPIDFCoefficients(p, i, d, f);
+        launcher.setVelocity(velocity);
 
-        launcher.setVelocity(100);}
+        currentVelo = (int)launcher.getVelocity();
+
+        telemetry.addData("hello", currentVelo);
+        telemetry.update();
+    }
+
+    public void StartShooter() {
+        velocity = -1565;
+    }
+
+    public void StopShooter() {
+        velocity = 40;
+    }
+
+
+
+
+
+
 }
