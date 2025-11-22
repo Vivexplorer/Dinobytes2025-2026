@@ -202,7 +202,7 @@ public class RearBlueScore2 extends OpMode {
 
             case 51:
                 if (pathTimer.getElapsedTimeSeconds()>1) {
-                    LauncherPID.velocity = 0;
+                    LauncherPID.velocity = 40;
                     follower.setMaxPower(0.28);
                     follower.followPath(line1IntakeGreen);
                     setPathState(55);
