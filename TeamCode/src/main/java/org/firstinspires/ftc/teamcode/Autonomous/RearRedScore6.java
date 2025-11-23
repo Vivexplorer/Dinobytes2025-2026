@@ -15,8 +15,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.LauncherPID;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RearBlueScore2")
-public class RearBlueScore2 extends OpMode {
+@Autonomous(name = "RearRedScore6")
+public class RearRedScore6 extends OpMode {
     Intake intake;
 
     Outtake outtake;
@@ -34,10 +34,10 @@ public class RearBlueScore2 extends OpMode {
 
     private int pathState;
 
-    private final Pose startPose = new Pose(60.5, 9, Math.toRadians(90));
-    private final Pose shootLong = new Pose(62.5, 15, Math.toRadians(112.5));
+    private final Pose startPose = new Pose(83.5, 9, Math.toRadians(90));
+    private final Pose shootLong = new Pose(85.5, 15, Math.toRadians(69.5));
 
-    private final Pose readyToIntake = new Pose(47, 33, Math.toRadians(180));
+    private final Pose readyToIntake = new Pose(97, 33, Math.toRadians(0));
 
 
 
@@ -184,7 +184,7 @@ public class RearBlueScore2 extends OpMode {
 
 
 
-            //start intaking
+                //start intaking
 
 
 
@@ -202,7 +202,7 @@ public class RearBlueScore2 extends OpMode {
 
             case 51:
                 if (pathTimer.getElapsedTimeSeconds()>1) {
-                    LauncherPID.velocity = 40;
+                    LauncherPID.velocity = 20;
                     follower.setMaxPower(0.28);
                     follower.followPath(line1IntakeGreen);
                     setPathState(55);
@@ -275,16 +275,16 @@ public class RearBlueScore2 extends OpMode {
         readyToIntakeFirst = new Path(new BezierLine(shootLong, readyToIntake));
         readyToIntakeFirst.setLinearHeadingInterpolation(shootLong.getHeading(), readyToIntake.getHeading());
 
-        line1IntakeGreen = new Path(new BezierLine(readyToIntake, new Pose(14,33)));
-        line1IntakeGreen.setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(180));
+        line1IntakeGreen = new Path(new BezierLine(readyToIntake, new Pose(130,33)));
+        line1IntakeGreen.setLinearHeadingInterpolation(Math.toRadians(0), Math.toRadians(0));
 
 
 
-        line1moveToScore = new Path(new BezierCurve(new Pose(14,33), new Pose(37, 26.5), shootLong));
-        line1moveToScore.setLinearHeadingInterpolation(Math.toRadians(180), shootLong.getHeading() + Math.toRadians(3));
+        line1moveToScore = new Path(new BezierCurve(new Pose(120,33), new Pose(107, 26.5), shootLong));
+        line1moveToScore.setLinearHeadingInterpolation(Math.toRadians(0), shootLong.getHeading());
 
-        moveOutOfScore = new Path(new BezierLine(shootLong, new Pose(shootLong.getX()-5, shootLong.getY()+8)));
-        moveOutOfScore.setLinearHeadingInterpolation(shootLong.getHeading() + Math.toRadians(3), Math.toRadians(90));
+        moveOutOfScore = new Path(new BezierLine(shootLong, new Pose(shootLong.getX()+5, shootLong.getY()+8)));
+        moveOutOfScore.setLinearHeadingInterpolation(shootLong.getHeading(), Math.toRadians(90));
 
 
 
