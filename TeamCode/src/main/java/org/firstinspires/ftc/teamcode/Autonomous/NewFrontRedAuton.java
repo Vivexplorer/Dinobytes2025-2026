@@ -38,7 +38,7 @@ public class NewFrontRedAuton extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, shootingTimer;
 
-    private int pathState = -2;
+    private int pathState = -1;
 
     private final Pose startPose = new Pose(120.907, 125.977, Math.toRadians(37));
 
@@ -47,7 +47,7 @@ public class NewFrontRedAuton extends OpMode {
 
     private final Pose readyToIntakeLine1 = new Pose(100, 83, Math.toRadians(0));
 
-    private final Pose readyToIntakeLine2 = new Pose(100, 59.5, Math.toRadians(0));
+    private final Pose readyToIntakeLine2 = new Pose(90, 62, Math.toRadians(0));
 
 
 
@@ -90,8 +90,10 @@ public class NewFrontRedAuton extends OpMode {
 
 
             case -1:
+                LauncherPID.velocity = 40;
                 outtake.runFeeder();
                 intake.spinIntake();
+                follower.setMaxPower(0.7);
                 follower.followPath(moveToScore1);
                 counter = 1;
                 setPathState(1);
@@ -101,7 +103,7 @@ public class NewFrontRedAuton extends OpMode {
 
 
             case 1:
-                if(pathTimer.getElapsedTimeSeconds()>0.5) {
+                if(!follower.isBusy()) {
                     follower.setMaxPower(1);
                     intake.spinIntake();
                     launcherPID.StartShooter();
@@ -193,7 +195,8 @@ public class NewFrontRedAuton extends OpMode {
 
             case 51:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(0.2);
+                    LauncherPID.velocity = 60;
+                    follower.setMaxPower(0.4);
                     follower.followPath(line1moveToIntake);
                     setPathState(52);
                 }
@@ -215,7 +218,7 @@ public class NewFrontRedAuton extends OpMode {
                 if (pathTimer.getElapsedTimeSeconds()>1) {
 
                     intake.spinIntake();
-                    launcherPID.StopShooter();
+                    LauncherPID.velocity = 60;
                     follower.followPath(line2readyToIntake);
                     setPathState(54);
                 }
@@ -223,7 +226,7 @@ public class NewFrontRedAuton extends OpMode {
 
             case 54:
                 if (!follower.isBusy()) {
-                    follower.setMaxPower(0.4);
+                    follower.setMaxPower(0.5);
                     follower.followPath(line2moveToIntake);
                     setPathState(55);
                 }
@@ -235,7 +238,7 @@ public class NewFrontRedAuton extends OpMode {
                     follower.setMaxPower(0.3);
                     follower.followPath(openGate);
 
-                    setPathState(1);
+                    setPathState(56);
                 }
                 break;
 
@@ -243,9 +246,10 @@ public class NewFrontRedAuton extends OpMode {
                 if (!follower.isBusy()) {
                     follower.setMaxPower(1);
                     follower.followPath(moveToScore3);
-                    counter=3;
+                    counter = 3;
                     setPathState(1);
                 }
+                break;
 
                //parking
 
