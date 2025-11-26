@@ -20,9 +20,11 @@
  *   SOFTWARE.
  */
 
+
 package org.firstinspires.ftc.teamcode.TeleOp1;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+import org.firstinspires.ftc.robotcore.external.State;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -30,11 +32,14 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 //Camera Imports
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -49,19 +54,21 @@ import java.util.concurrent.TimeUnit;
 
 // Camera Imports
 
+
 /*
  * This file includes a teleop (driver-controlled) file for the DinoByte! goBILDA® Robot for the
  * 2025-2026 FIRST® Tech Challenge season DECODE™!
  */
 
-@TeleOp(name = "TestingCamera", group = "teamcode")
+@TeleOp(name = "TeleOp", group = "teamcode")
 //@Disabled
 public class TestingCamera extends OpMode {
 
     //Camera Declarations
 
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 55.0; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE_NEAR = 60.0; //  this is how close the camera should get to the target for the near pos (inches)
+    final double DESIRED_DISTANCE_FAR = 118.0; //  this is how close the camera should get to the target for the near pos (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -74,39 +81,57 @@ public class TestingCamera extends OpMode {
     final double MAX_AUTO_STRAFE= 0.5;   //  Clip the strafing speed to this max value (adjust for your robot)
     final double MAX_AUTO_TURN  = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
 
+    /*
+    private DcMotor frontLeftDrive = null;  //  Used to control the left front drive wheel
+    private DcMotor frontRightDrive = null;  //  Used to control the right front drive wheel
+    private DcMotor backLeftDrive = null;  //  Used to control the left back drive wheel
+    private DcMotor backRightDrive = null;  //  Used to control the right back drive wheel
+    */
+
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     private static final int DESIRED_TAG_ID = -1;     // Choose the tag you want to approach or set to -1 for ANY tag.
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
 
+
     //Camera Declarations
 
-    final double BOOTCLOSE_TIME_SECONDS = 0.75; //The boot servo waits this long before closing when a shot is requested.
-    final double BOOTOPEN_TIME_SECONDS = 0.75; //The boot servo run this long before opening after making a shot.
+
+    final double BOOTCLOSE_TIME_SECONDS = 0.35; //The boot servo waits this long before closing when a shot is requested.
+    final double BOOTOPEN_TIME_SECONDS = 0.35; //The boot servo run this long before opening after making a shot.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double FULL_SPEED = 1.0;
 
-    final double LAUNCHER_CLOSE_TARGET_VELOCITY = 1600; //in ticks/second for the close goal.
-    final double LAUNCHER_CLOSE_MIN_VELOCITY = 1570; //minimum required to start a shot for close goal.
+    final double LAUNCHER_CLOSE_TARGET_VELOCITY = 1700; //in ticks/second for the close goal.
+    final double LAUNCHER_CLOSE_MIN_VELOCITY = 1675; //minimum required to start a shot for close goal.
 
     final double LAUNCHER_FAR_TARGET_VELOCITY = 2025; //Target velocity for far goal
     final double LAUNCHER_FAR_MIN_VELOCITY = 2000; //minimum required to start a shot for far goal.
 
+    final double LAUNCHER_REVERSE_TARGET_VELOCITY = -100; //in ticks/second during Intake.
+    final double LAUNCHER_REVERSE_MIN_VELOCITY = -110; //in ticks/second during Intake.
+
     double launcherTarget = LAUNCHER_CLOSE_TARGET_VELOCITY; //These variables allow
     double launcherMin = LAUNCHER_CLOSE_MIN_VELOCITY;
 
-    final double RTGATEOPEN_POSITION = 0.5; //the open and close position for the gate servos
-    final double RTGATECLOSE_POSITION = 0.7;
+    final double RTGATEOPEN_POSITION = 0.2; //the open and close position for the gate servos
+    final double RTGATECLOSE_POSITION = 0.65;
 
-    final double LFTGATEOPEN_POSITION = 0.5; //the open and close position for the gate servos
-    final double LFTGATECLOSE_POSITION = 0.3;
+    final double LFTGATEOPEN_POSITION = 1.0; //the open and close position for the gate servos
+    final double LFTGATECLOSE_POSITION = 0.35;
 
     final double RRBOOTOPEN_POSITION = 0.28; //the open and close position for the rear boot servo
-    final double RRBOOTCLOSE_POSITION = 1.00;
+    final double RRBOOTCLOSE_POSITION = 1.0;
 
     final double LEFT_POSITION = 0.3; //the left and right position for the diverter servo
     final double RIGHT_POSITION = 0.0;
+
+    // Define high and low target positions (in encoder ticks)
+    final int ELEVATORHIGH_TARGET_POSITION = 10;
+    final int ELEVATORLOW_TARGET_POSITION = 0;
+    // Current target position
+    int currentTargetPosition = ELEVATORLOW_TARGET_POSITION;
 
     // Declare OpMode members.
     private DcMotor leftFrontDrive = null;
@@ -127,13 +152,18 @@ public class TestingCamera extends OpMode {
     ElapsedTime bootCloseTimer = new ElapsedTime();
     ElapsedTime bootOpenTimer = new ElapsedTime();
     ElapsedTime sleepTimer = new ElapsedTime();
+    ElapsedTime runtime = new ElapsedTime();
 
     private enum LaunchState {
         IDLE,
-        SPIN_UP,
-        LAUNCH,
-        BOOT,
-        LAUNCHING,
+        //SPIN_UP,
+        //LAUNCH,
+        BOOTCLOSE,
+        BOOTOPEN,
+        BOOTCLOSE2,
+        BOOTOPEN2,
+        BOOTCLOSE3,
+        BOOTOPEN3;
     }
     private LaunchState leftLaunchState;
     private LaunchState rightLaunchState;
@@ -160,7 +190,7 @@ public class TestingCamera extends OpMode {
         RRBOOTOPEN,
         RRBOOTCLOSE;
     }
-    private RearBootState rearBootState = RearBootState.RRBOOTOPEN;
+    private RearBootState rearBootState = RearBootState.RRBOOTCLOSE;
 
     private enum IntakeState {
         ON,
@@ -178,7 +208,8 @@ public class TestingCamera extends OpMode {
 
     private enum LauncherDistance {
         CLOSE,
-        FAR;
+        FAR,
+        REVERSE;
     }
 
     private LauncherDistance launcherDistance = LauncherDistance.CLOSE;
@@ -196,20 +227,27 @@ public class TestingCamera extends OpMode {
     public void init() {
 
         // Camera Code Initializations
+
+        boolean targetFound     = false;    // Set to true when an AprilTag target is detected
+        double  drive           = 0;        // Desired forward power/speed (-1 to +1)
+        double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
+        double  turn            = 0;        // Desired turning power/speed (-1 to +1)
+
+        // Camera Code Initializations
+
         // Initialize the Apriltag Detection process
         initAprilTag();
 
-        // Set camera exposure once during init
-        if (USE_WEBCAM)
-            setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
-
+        //if (USE_WEBCAM)
+        //    setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
         // Wait for driver to press start
         telemetry.addData("Camera preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch START to start OpMode");
 
-        leftLaunchState = LaunchState.IDLE;
-        rightLaunchState = LaunchState.IDLE;
+        leftLaunchState = LaunchState.BOOTOPEN;
+        rightLaunchState = LaunchState.BOOTOPEN;
 
+        // Initialize the DC and Servo motors
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         leftBackDrive = hardwareMap.get(DcMotor.class, "leftBackDrive");
@@ -240,8 +278,13 @@ public class TestingCamera extends OpMode {
 
         launcher.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        // Reset the encoder during initialization
+        launcher.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftElevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightElevator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        // Use RUN_USING_ENCODER for manual control
+        launcher.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         leftElevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightElevator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
@@ -264,7 +307,7 @@ public class TestingCamera extends OpMode {
          */
         //rearFeeder.setPower(STOP_SPEED);
         frontFeeder.setPower(STOP_SPEED);
-        //launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(300, 0, 0, 10));
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(900, 0, 40, 41));
 
         /*
          * Much like our drivetrain motors, we set the front feeder servo to reverse so that they
@@ -284,6 +327,11 @@ public class TestingCamera extends OpMode {
          * Tell the driver that initialization is complete.
          */
         telemetry.addData("Status", "Initialized");
+        /* telemetry.addData("Current leftElevator Position", leftElevator.getCurrentPosition());
+        telemetry.addData("Current rightElevator Position", rightElevator.getCurrentPosition());
+        telemetry.addData("Elevator Target Position", currentTargetPosition);
+        telemetry.addData("leftElevator Busy", leftElevator.isBusy());
+        telemetry.addData("rightElevator Busy", rightElevator.isBusy()); */
         telemetry.update();
     }
 
@@ -292,6 +340,7 @@ public class TestingCamera extends OpMode {
      */
     @Override
     public void init_loop() {
+        // Optional: Add telemetry or other actions during the init_loop
     }
 
     /*
@@ -299,6 +348,10 @@ public class TestingCamera extends OpMode {
      */
     @Override
     public void start() {
+        runtime.reset();
+        // Set your desired target position here, for example, 1000 encoder ticks
+        //targetPosition = 1000;
+        telemetry.addData("Status", "Started");
     }
 
     /*
@@ -307,13 +360,17 @@ public class TestingCamera extends OpMode {
     @Override
     public void loop() {
 
-        //Camera Code
+        //Camera Code START
+        if (USE_WEBCAM)
+            setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
         boolean targetFound     = false;    // Set to true when an AprilTag target is detected
-        double  drive           = 0;        // Desired forward power/speed (-1 to +1)
-        double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
-        double  turn            = 0;        // Desired turning power/speed (-1 to +1)
-
+        double  drive           = 0.0;        // Desired forward power/speed (-1 to +1)
+        double  strafe          = 0.0;        // Desired strafe power/speed (-1 to +1)
+        double  turn            = 0.0;        // Desired turning power/speed (-1 to +1)
+        //targetFound = false;
+        //private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
         desiredTag  = null;
+
 
         // Step through the list of detected tags and look for a matching tag
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -350,7 +407,7 @@ public class TestingCamera extends OpMode {
         // If Driver left bumper is being pressed, AND we have found the desired target, Drive to target Automatically .
         if (gamepad1.left_bumper && targetFound) {
             // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
-            double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+            double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE_NEAR);
             double  headingError    = desiredTag.ftcPose.bearing;
             double  yawError        = desiredTag.ftcPose.yaw;
 
@@ -359,37 +416,102 @@ public class TestingCamera extends OpMode {
             turn   = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN) ;
             strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
 
-            telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+            telemetry.addData("AutoNear","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+        } else if (gamepad1.right_bumper && targetFound) {
+            // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
+            double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE_FAR);
+            double  headingError    = desiredTag.ftcPose.bearing;
+            double  yawError        = desiredTag.ftcPose.yaw;
 
-            // Apply automatic driving to the drivetrain
-            moveRobot(drive, strafe, turn);
+            // Use the speed and turn "gains" to calculate how we want the robot to move.
+            drive  = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+            turn   = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN) ;
+            strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
+
+            telemetry.addData("AutoFar","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
         } else {
-            // Use manual driving when not tracking AprilTag
-            mecanumDrive(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
-            telemetry.addData("Manual","Drive using joysticks");
+
+            // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
+            drive  = -gamepad1.left_stick_y;  // Reduce drive rate to 50%.
+            strafe = -gamepad1.left_stick_x;  // Reduce strafe rate to 50%.
+            turn   = -gamepad1.right_stick_x;  // Reduce turn rate to 33%.
+            telemetry.addData("Manual","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
         }
-        //Camera Code
+        //Camera Code END
+
+        // Apply desired axes motions to the drivetrain.
+        moveRobot(drive,strafe,turn);
+
 
         /*
-         * Here we give the user control of the power to elevator motors for the end game.
+         * Here we give the driver control of the power to elevator motors for the end game.
+         * 1. Elevator goes up with Y, 2. Elevator goes down with B, 3. Elevator stops with X
+         * 4. Intake On with A
          */
+        // Ensure Elevator target position stays within limits
+        if (currentTargetPosition > ELEVATORHIGH_TARGET_POSITION) {
+            currentTargetPosition = ELEVATORHIGH_TARGET_POSITION;
+        } else if (currentTargetPosition < ELEVATORLOW_TARGET_POSITION) {
+            currentTargetPosition = ELEVATORLOW_TARGET_POSITION;
+        }
+
         if (gamepad1.yWasPressed()){
-            switch (elevatorState){
+            switch (leftGateState){
+                case LFTGATEOPEN:
+                    leftGateState = LeftGateState.LFTGATECLOSE;
+                    leftGate.setPosition(LFTGATECLOSE_POSITION);
+                    rightGate.setPosition(RTGATECLOSE_POSITION);
+                    break;
+                case LFTGATECLOSE:
+                    leftGateState = LeftGateState.LFTGATEOPEN;
+                    leftGate.setPosition(LFTGATEOPEN_POSITION);
+                    rightGate.setPosition(RTGATEOPEN_POSITION);
+                    break;
+            }
+            /*currentTargetPosition = ELEVATORHIGH_TARGET_POSITION;
+                leftElevator.setTargetPosition(currentTargetPosition);
+                leftElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                leftElevator.setPower(1.0); // Set a power level for movement
+                rightElevator.setTargetPosition(currentTargetPosition);
+                rightElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                rightElevator.setPower(1.0);*/ // Set a power level for movement
+                /* telemetry.addData("Current leftElevator Position", leftElevator.getCurrentPosition());
+                telemetry.addData("Current rightElevator Position", rightElevator.getCurrentPosition());
+                telemetry.addData("Elevator Target Position", currentTargetPosition);
+                telemetry.addData("leftElevator Busy", leftElevator.isBusy());
+                telemetry.addData("rightElevator Busy", rightElevator.isBusy()); */
+                /*switch (elevatorState){
                 case LOW:
                     elevatorState = ElevatorState.HIGH;
+                    leftElevator.setTargetPosition(ELEVATORHIGH_POSITION);
+                    rightElevator.setTargetPosition(ELEVATORHIGH_POSITION);
                     leftElevator.setPower(1);
                     rightElevator.setPower(1);
                     break;
                 case HIGH:
                     elevatorState = ElevatorState.LOW;
+                    leftElevator.setTargetPosition(ELEVATORLOW_POSITION);
+                    rightElevator.setTargetPosition(ELEVATORLOW_POSITION);
                     leftElevator.setPower(0);
                     rightElevator.setPower(0);
                     break;
-            }
+            }*/
         } else if (gamepad1.b) { // Bring down elevator
-            elevatorState = ElevatorState.LOW;
-            leftElevator.setPower(-1);
-            rightElevator.setPower(-1);
+            currentTargetPosition = ELEVATORLOW_TARGET_POSITION;
+            leftElevator.setTargetPosition(currentTargetPosition);
+            leftElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftElevator.setPower(-1.0); // Set a power level for movement
+            rightElevator.setTargetPosition(currentTargetPosition);
+            rightElevator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightElevator.setPower(-1.0); // Set a power level for movement
+                /* telemetry.addData("Current leftElevator Position", leftElevator.getCurrentPosition());
+                telemetry.addData("Current rightElevator Position", rightElevator.getCurrentPosition());
+                telemetry.addData("Elevator Target Position", currentTargetPosition);
+                telemetry.addData("leftElevator Busy", leftElevator.isBusy());
+                telemetry.addData("rightElevator Busy", rightElevator.isBusy()); */
+            //elevatorState = ElevatorState.LOW;
+            //leftElevator.setPower(-1);
+            //rightElevator.setPower(-1);
         } else if (gamepad1.x) { // Powerdown elevator
             leftElevator.setPower(0);
             rightElevator.setPower(0);
@@ -407,92 +529,59 @@ public class TestingCamera extends OpMode {
         }
 
         /*
-         * Here we give the user control of the speed of the launcher motor without automatically
-         * queuing a shot.
+         * Here we give the Operator control of the speed of the launcher motor without automatically
+         * queuing a shot. 1. Dpad Up for a Close Shot, 2. Dpad Down for a Far Shot, 3. guide the intake
+         * to left with Dpad Left or right with Dpad Right
          */
         if (gamepad2.dpadUpWasPressed()) {
-            switch (launcherDistance) {
-                case CLOSE:
-                    launcherDistance = LauncherDistance.FAR;
-                    launcherTarget = LAUNCHER_FAR_TARGET_VELOCITY;
-                    launcherMin = LAUNCHER_FAR_MIN_VELOCITY;
-                    break;
-                case FAR:
-                    launcherDistance = LauncherDistance.CLOSE;
-                    launcherTarget = LAUNCHER_CLOSE_TARGET_VELOCITY;
-                    launcherMin = LAUNCHER_CLOSE_MIN_VELOCITY;
-                    break;
-            }
-        }
+            launcherDistance = LauncherDistance.CLOSE;
+            launcherTarget = LAUNCHER_CLOSE_TARGET_VELOCITY;
+            launcherMin = LAUNCHER_CLOSE_MIN_VELOCITY;
+        } else if (gamepad2.dpadDownWasPressed()) {
+            launcherDistance = LauncherDistance.FAR;
+            launcherTarget = LAUNCHER_FAR_TARGET_VELOCITY;
+            launcherMin = LAUNCHER_FAR_MIN_VELOCITY;
+        } else if (gamepad2.dpadLeftWasPressed()) {
+            launcherDistance = LauncherDistance.REVERSE;
+            launcherTarget = LAUNCHER_REVERSE_TARGET_VELOCITY;
+            launcherMin = LAUNCHER_REVERSE_MIN_VELOCITY;
+            //diverterDirection = DiverterDirection.LEFT;
+            //diverter.setPosition(LEFT_POSITION);
+        } //else if (gamepad2.dpadRightWasPressed()) {
+        //diverterDirection = DiverterDirection.RIGHT;
+        //diverter.setPosition(RIGHT_POSITION);
+        //}
 
         /*
-         * Here we give the user control to start the launcher, intake and front feeder with Y
-         * and stop the launcher and front feeder with B
+         * Here we give the operator control to 1. start the launcher, front feeder and intake with Y
+         * 2. stop the launcher and front feeder with B, 3. reverse the launcher with A, 4. reverse the
+         * intake with X
          */
-        if (gamepad2.y) {
+        if (gamepad2.y) { // start flywheel and front feeder
             launcher.setVelocity(launcherTarget);
             frontFeeder.setPower(FULL_SPEED);
             intakeState = IntakeState.ON;
             intake.setPower(1);
         } else if (gamepad2.b) { // stop flywheel and front feeder
-            launcher.setVelocity(STOP_SPEED);
+            launcher.setVelocity(LAUNCHER_REVERSE_TARGET_VELOCITY);
             frontFeeder.setPower(STOP_SPEED);
+            //intakeState = IntakeState.OFF;
+            //intake.setPower(0);
+        } else if (gamepad2.a) { // reverse the flywheel only
+            rearBootState = RearBootState.RRBOOTOPEN;
+            rearBoot.setPosition(RRBOOTOPEN_POSITION);
+            launcher.setVelocity(-launcherTarget);
+        } else if (gamepad2.x) { // reverse the intake
             intakeState = IntakeState.OFF;
-            intake.setPower(0);
-        }
-
-        /*
-         * Here we give the user control to guide the intake to left or right
-         */
-        if (gamepad2.dpadDownWasPressed()) {
-            switch (diverterDirection){
-                case LEFT:
-                    diverterDirection = DiverterDirection.RIGHT;
-                    diverter.setPosition(RIGHT_POSITION);
-                    break;
-                case RIGHT:
-                    diverterDirection = DiverterDirection.LEFT;
-                    diverter.setPosition(LEFT_POSITION);
-                    break;
-            }
-        }
-
-        /*
-         * Here we give the user control to start the intake
-         */
-        if (gamepad2.aWasPressed()){
-            switch (rightGateState){
-                case RTGATEOPEN:
-                    rightGateState = RightGateState.RTGATECLOSE;
-                    rightGate.setPosition(RTGATECLOSE_POSITION);
-                    break;
-                case RTGATECLOSE:
-                    rightGateState = RightGateState.RTGATEOPEN;
-                    rightGate.setPosition(RTGATEOPEN_POSITION);
-                    break;
-            }
-        }
-
-        /*
-         * Here we give the user control to open close left gate
-         */
-        if (gamepad2.xWasPressed()){
-            switch (leftGateState){
-                case LFTGATEOPEN:
-                    leftGateState = LeftGateState.LFTGATECLOSE;
-                    leftGate.setPosition(LFTGATECLOSE_POSITION);
-                    break;
-                case LFTGATECLOSE:
-                    leftGateState = LeftGateState.LFTGATEOPEN;
-                    leftGate.setPosition(LFTGATEOPEN_POSITION);
-                    break;
-            }
+            intake.setPower(-1);
         }
 
         /*
          * Now we call our "Launch" function.
          */
-
+//        if(gamepad2.leftBumperWasPressed()) {
+//            launchLeft(true);
+//        }
         launchLeft(gamepad2.leftBumperWasPressed());
         launchRight(gamepad2.rightBumperWasPressed());
 
@@ -511,29 +600,105 @@ public class TestingCamera extends OpMode {
      */
     @Override
     public void stop() {
+        //
+        leftElevator.setPower(0.0);
+        rightElevator.setPower(0.0);
+        launcher.setPower (0.0);
     }
 
-    void mecanumDrive(double forward, double strafe, double rotate){
-
-        /* the denominator is the largest motor power (absolute value) or 1
-         * This ensures all the powers maintain the same ratio,
-         * but only if at least one is out of the range [-1, 1]
-         */
-        double denominator = Math.max(Math.abs(forward) + Math.abs(strafe) + Math.abs(rotate), 1);
-
-        leftFrontPower = (forward + strafe + rotate) / denominator;
-        rightFrontPower = (forward - strafe - rotate) / denominator;
-        leftBackPower = (forward - strafe + rotate) / denominator;
-        rightBackPower = (forward + strafe - rotate) / denominator;
-
-        leftFrontDrive.setPower(leftFrontPower);
-        rightFrontDrive.setPower(rightFrontPower);
-        leftBackDrive.setPower(leftBackPower);
-        rightBackDrive.setPower(rightBackPower);
+    //Shooting with the left gate open
+    //
+    void launchLeft(boolean shotRequested) {
+        switch (leftLaunchState) {
+            case IDLE:
+                if (shotRequested) {
+                    leftLaunchState = LaunchState.BOOTCLOSE;
+                    bootCloseTimer.reset();
+                }
+                break;
+            case BOOTCLOSE:
+                if(bootCloseTimer.seconds() > BOOTCLOSE_TIME_SECONDS){
+                    rearBootState = RearBootState.RRBOOTCLOSE;
+                    rearBoot.setPosition(RRBOOTCLOSE_POSITION);
+                    leftLaunchState = LaunchState.BOOTOPEN;
+                }
+                bootOpenTimer.reset();
+                break;
+            case BOOTOPEN:
+                if (bootOpenTimer.seconds() > BOOTOPEN_TIME_SECONDS) {
+                    rearBootState = RearBootState.RRBOOTOPEN;
+                    rearBoot.setPosition(RRBOOTOPEN_POSITION);
+                    leftLaunchState = LaunchState.BOOTCLOSE2;
+                    bootCloseTimer.reset();
+                }
+                break;
+            case BOOTCLOSE2:
+                if(bootCloseTimer.seconds() > BOOTCLOSE_TIME_SECONDS){
+                    rearBootState = RearBootState.RRBOOTCLOSE;
+                    rearBoot.setPosition(RRBOOTCLOSE_POSITION);
+                    leftLaunchState = LaunchState.BOOTOPEN2;
+                }
+                bootOpenTimer.reset();
+                break;
+            case BOOTOPEN2:
+                if (bootOpenTimer.seconds() > BOOTOPEN_TIME_SECONDS) {
+                    rearBootState = RearBootState.RRBOOTOPEN;
+                    rearBoot.setPosition(RRBOOTOPEN_POSITION);
+                    leftLaunchState = LaunchState.BOOTCLOSE3;
+                    bootCloseTimer.reset();
+                }
+                break;
+            case BOOTCLOSE3:
+                if(bootCloseTimer.seconds() > BOOTCLOSE_TIME_SECONDS){
+                    rearBootState = RearBootState.RRBOOTCLOSE;
+                    rearBoot.setPosition(RRBOOTCLOSE_POSITION);
+                    leftLaunchState = LaunchState.BOOTOPEN3;
+                }
+                bootOpenTimer.reset();
+                break;
+            case BOOTOPEN3:
+                if (bootOpenTimer.seconds() > BOOTOPEN_TIME_SECONDS) {
+                    rearBootState = RearBootState.RRBOOTOPEN;
+                    rearBoot.setPosition(RRBOOTOPEN_POSITION);
+                    leftLaunchState = LaunchState.IDLE;
+                    bootCloseTimer.reset();
+                }
+                break;
+        }
     }
+
+
+    // Shooting with the right gate open
+    //
+    void launchRight(boolean shotRequested) {
+        switch (rightLaunchState) {
+            case IDLE:
+                if (shotRequested) {
+                    rightLaunchState = LaunchState.BOOTCLOSE;
+                    bootCloseTimer.reset();
+                }
+                break;
+            case BOOTCLOSE:
+                if(bootCloseTimer.seconds() > BOOTCLOSE_TIME_SECONDS){
+                    rearBootState = RearBootState.RRBOOTCLOSE;
+                    rearBoot.setPosition(RRBOOTCLOSE_POSITION);
+                    rightLaunchState = LaunchState.BOOTOPEN;
+                }
+                bootOpenTimer.reset();
+                break;
+            case BOOTOPEN:
+                if (bootOpenTimer.seconds() > BOOTOPEN_TIME_SECONDS) {
+                    rearBootState = RearBootState.RRBOOTOPEN;
+                    rearBoot.setPosition(RRBOOTOPEN_POSITION);
+                    rightLaunchState = LaunchState.IDLE;
+                }
+                break;
+        }
+    }
+
 
     /**
-     * Move robot according to desired axes motions for AprilTag tracking
+     * Move robot according to desired axes motions
      * <p>
      * Positive X is forward
      * <p>
@@ -567,100 +732,6 @@ public class TestingCamera extends OpMode {
         rightBackDrive.setPower(backRightPower);
     }
 
-    //Shooting with the left gate open
-    void launchLeft(boolean shotRequested) {
-        switch (leftLaunchState) {
-            case IDLE:
-                if (shotRequested) {
-                    leftLaunchState = LaunchState.SPIN_UP;
-                }
-                break;
-            case SPIN_UP:
-                //launcher.setVelocity(launcherTarget);
-
-                //if (launcher.getVelocity() > launcherMin) {
-                //frontFeeder.setPower(FULL_SPEED);
-                leftLaunchState = LaunchState.LAUNCH;
-                //}
-                break;
-            case LAUNCH:
-
-                leftGateState = LeftGateState.LFTGATEOPEN;
-                leftGate.setPosition(LFTGATEOPEN_POSITION);
-                bootCloseTimer.reset();
-
-                leftLaunchState = LaunchState.BOOT;
-                break;
-            case BOOT:
-
-                if(bootCloseTimer.seconds() > BOOTCLOSE_TIME_SECONDS){
-                    leftGateState = LeftGateState.LFTGATECLOSE;
-                    leftGate.setPosition(LFTGATECLOSE_POSITION);
-                    rearBootState = RearBootState.RRBOOTCLOSE;
-                    rearBoot.setPosition(RRBOOTCLOSE_POSITION);
-                    leftLaunchState = LaunchState.LAUNCHING;
-                }
-                bootOpenTimer.reset();
-                break;
-            case LAUNCHING:
-
-                if (bootOpenTimer.seconds() > BOOTOPEN_TIME_SECONDS) {
-                    rearBootState = RearBootState.RRBOOTOPEN;
-                    rearBoot.setPosition(RRBOOTOPEN_POSITION);
-
-                    //frontFeeder.setPower(STOP_SPEED);
-                    //launcher.setVelocity(STOP_SPEED);
-                    leftLaunchState = LaunchState.IDLE;
-                }
-                break;
-        }
-    }
-
-    // Shooting with the right gate open
-    //
-    void launchRight(boolean shotRequested) {
-        switch (rightLaunchState) {
-            case IDLE:
-                if (shotRequested) {
-                    rightLaunchState = LaunchState.SPIN_UP;
-                }
-                break;
-            case SPIN_UP:
-                //launcher.setVelocity(launcherTarget);
-
-                //if (launcher.getVelocity() > launcherMin) {
-                //    frontFeeder.setPower(FULL_SPEED);
-                rightLaunchState = LaunchState.LAUNCH;
-                //}
-                break;
-            case LAUNCH:
-                rightGateState = RightGateState.RTGATEOPEN;
-                rightGate.setPosition(RTGATEOPEN_POSITION);
-                bootCloseTimer.reset();
-
-                rightLaunchState = LaunchState.BOOT;
-                break;
-            case BOOT:
-                if(bootCloseTimer.seconds() > BOOTCLOSE_TIME_SECONDS){
-                    rightGateState = RightGateState.RTGATECLOSE;
-                    rightGate.setPosition(RTGATECLOSE_POSITION);
-                    rearBootState = RearBootState.RRBOOTCLOSE;
-                    rearBoot.setPosition(RRBOOTCLOSE_POSITION);
-                    rightLaunchState = LaunchState.LAUNCHING;
-                }
-                bootOpenTimer.reset();
-                break;
-            case LAUNCHING:
-                if (bootOpenTimer.seconds() > BOOTOPEN_TIME_SECONDS) {
-                    rearBootState = RearBootState.RRBOOTOPEN;
-                    rearBoot.setPosition(RRBOOTOPEN_POSITION);
-                    //frontFeeder.setPower(STOP_SPEED);
-                    //launcher.setVelocity(STOP_SPEED);
-                    rightLaunchState = LaunchState.IDLE;
-                }
-                break;
-        }
-    }
 
     /**
      * Initialize the AprilTag processor.
@@ -692,11 +763,12 @@ public class TestingCamera extends OpMode {
         }
     }
 
+
     /*
      Manually set the camera gain and exposure.
      This can only be called AFTER calling initAprilTag(), and only works for Webcams;
     */
-    private void setManualExposure(int exposureMS, int gain) {
+    private void    setManualExposure(int exposureMS, int gain) {
         // Wait for the camera to be open, then use the controls
 
         if (visionPortal == null) {
@@ -706,31 +778,35 @@ public class TestingCamera extends OpMode {
         // Make sure camera is streaming before we try to set the exposure controls
         if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
             telemetry.addData("Camera", "Waiting");
-            telemetry.update();
-
-            // Wait for camera to be ready
-            ElapsedTime cameraWaitTimer = new ElapsedTime();
-            while (cameraWaitTimer.seconds() < 10 && visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
-                // Just wait
+            //telemetry.update();
+            if ((visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
+                sleepTimer.reset();
+                if (sleepTimer.seconds() > 20) {}
+                //sleep(20);
             }
-
             telemetry.addData("Camera", "Ready");
             telemetry.update();
         }
 
-        // Set camera controls
+        // Set camera controls unless we are stopping.
+        //if (!isStopRequested())
+        //{
         ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
         if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
             exposureControl.setMode(ExposureControl.Mode.Manual);
             sleepTimer.reset();
-            while (sleepTimer.seconds() < 0.05) {} // sleep(50)
+            if (sleepTimer.seconds() > 50) {}
+            //sleep(50);
         }
         exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
         sleepTimer.reset();
-        while (sleepTimer.seconds() < 0.02) {} // sleep(20)
+        if (sleepTimer.seconds() > 20) {}
+        //sleep(20);
         GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
         gainControl.setGain(gain);
         sleepTimer.reset();
-        while (sleepTimer.seconds() < 0.02) {} // sleep(20)
+        if (sleepTimer.seconds() > 20) {}
+        //sleep(20);
+        //}
     }
 }
