@@ -16,7 +16,7 @@ public class LauncherPID  {
 
     public DcMotorEx launcher;
 
-    public static double p = 915, i = 0, d = 40, f = 41;
+    public static double p = 1000, i = 0, d = 40, f = 45;
 
     public static int velocity;
 

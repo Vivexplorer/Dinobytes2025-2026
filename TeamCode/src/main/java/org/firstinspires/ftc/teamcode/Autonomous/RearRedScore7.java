@@ -219,7 +219,7 @@ public class RearRedScore7 extends OpMode {
 
             case 51:
                 if (pathTimer.getElapsedTimeSeconds()>1) {
-                    LauncherPID.velocity = 20;
+                    LauncherPID.velocity = 60;
                     follower.setMaxPower(0.28);
                     follower.followPath(line1IntakeGreen);
                     setPathState(55);

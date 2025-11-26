@@ -45,9 +45,9 @@ public class NewFrontRedAuton extends OpMode {
     private final Pose scoreShort = new Pose(83.7, 81, Math.toRadians(48));
 
 
-    private final Pose readyToIntakeLine1 = new Pose(100, 83, Math.toRadians(0));
+    private final Pose readyToIntakeLine1 = new Pose(100, 85, Math.toRadians(0));
 
-    private final Pose readyToIntakeLine2 = new Pose(90, 62, Math.toRadians(0));
+    private final Pose readyToIntakeLine2 = new Pose(96, 62, Math.toRadians(0));
 
 
 
@@ -90,10 +90,10 @@ public class NewFrontRedAuton extends OpMode {
 
 
             case -1:
-                LauncherPID.velocity = 40;
+                LauncherPID.velocity = 300;
                 outtake.runFeeder();
                 intake.spinIntake();
-                follower.setMaxPower(0.7);
+                follower.setMaxPower(1);
                 follower.followPath(moveToScore1);
                 counter = 1;
                 setPathState(1);
@@ -107,9 +107,11 @@ public class NewFrontRedAuton extends OpMode {
                     follower.setMaxPower(1);
                     intake.spinIntake();
                     launcherPID.StartShooter();
-                    setPathState(4);
+                    setPathState(8);
                 }
                 break;
+
+                //take out case 4 and 5
 
 
 
@@ -129,52 +131,58 @@ public class NewFrontRedAuton extends OpMode {
 
 
 
+
+
             case 8:
-                if (pathTimer.getElapsedTimeSeconds()>0.60) {
+                if (launcherPID.launcher.getVelocity()<-1500) {
                     outtake.closeBoot();
                     setPathState(9);
                 }
                 break;
 
             case 9:
-                if (pathTimer.getElapsedTimeSeconds()>0.75) {
+                if (pathTimer.getElapsedTimeSeconds()>1) {
                     outtake.openBoot();
                     setPathState(12);
+
                 }
                 break;
 
 
 
             case 12:
-                if (pathTimer.getElapsedTimeSeconds()>0.60) {
+                if (pathTimer.getElapsedTimeSeconds()>1) {
                     outtake.closeBoot();
                     setPathState(13);
                 }
                 break;
 
             case 13:
-                if(pathTimer.getElapsedTimeSeconds()>0.60) {
+                if(pathTimer.getElapsedTimeSeconds()>0.5) {
                     outtake.openBoot();
-                    setPathState(6);
+                    if (counter == 3) {
+                        setPathState(200);
+                    }else {
+                        setPathState(6);
+                    }
+
                 }
                 break;
 
             case 6:
-                if (pathTimer.getElapsedTimeSeconds()>0.60) {
+                if (pathTimer.getElapsedTimeSeconds()>1) {
                     outtake.closeBoot();
                     setPathState(7);
                 }
                 break;
 
             case 7:
-                if (pathTimer.getElapsedTimeSeconds()>0.75) {
+                if (pathTimer.getElapsedTimeSeconds()>0.5) {
                     outtake.openBoot();
                     if (counter == 1) {
                         setPathState(50);
                     } else if (counter == 2){
                         setPathState(53);
-                    } else {
-                        setPathState(200);
                     }
                 }
                 break;
@@ -184,7 +192,7 @@ public class NewFrontRedAuton extends OpMode {
             //start line 1 intake sequence
 
             case 50:
-                if (pathTimer.getElapsedTimeSeconds()>1) {
+                if (pathTimer.getElapsedTimeSeconds()>0.5) {
 
                     intake.spinIntake();
                     launcherPID.StopShooter();
@@ -195,8 +203,8 @@ public class NewFrontRedAuton extends OpMode {
 
             case 51:
                 if (!follower.isBusy()) {
-                    LauncherPID.velocity = 60;
-                    follower.setMaxPower(0.4);
+                    LauncherPID.velocity = 300;
+                    follower.setMaxPower(0.5);
                     follower.followPath(line1moveToIntake);
                     setPathState(52);
                 }
@@ -215,10 +223,11 @@ public class NewFrontRedAuton extends OpMode {
                 //start line 2 intake sequence
 
             case 53:
-                if (pathTimer.getElapsedTimeSeconds()>1) {
+                if (pathTimer.getElapsedTimeSeconds()>0.75) {
 
                     intake.spinIntake();
-                    LauncherPID.velocity = 60;
+                    LauncherPID.velocity = 300;
+                    follower.setMaxPower(1);
                     follower.followPath(line2readyToIntake);
                     setPathState(54);
                 }
@@ -228,11 +237,12 @@ public class NewFrontRedAuton extends OpMode {
                 if (!follower.isBusy()) {
                     follower.setMaxPower(0.5);
                     follower.followPath(line2moveToIntake);
-                    setPathState(55);
+                    setPathState(56);
                 }
                 break;
 
 
+                //dont use opengate
             case 55:
                 if (!follower.isBusy()) {
                     follower.setMaxPower(0.3);
@@ -297,16 +307,16 @@ public class NewFrontRedAuton extends OpMode {
         moveToScore2 = new Path(new BezierLine(new Pose(readyToIntakeLine1.getX()+24, readyToIntakeLine1.getY()), scoreShort));
         moveToScore2.setLinearHeadingInterpolation(readyToIntakeLine1.getHeading(), scoreShort.getHeading());
 
-        line2readyToIntake = new Path(new BezierLine(scoreShort, readyToIntakeLine2));
+        line2readyToIntake = new Path(new BezierLine(scoreShort, new Pose(readyToIntakeLine2.getX(), readyToIntakeLine2.getY()+3.5)));
         line2readyToIntake.setLinearHeadingInterpolation(scoreShort.getHeading(), readyToIntakeLine2.getHeading());
 
-        line2moveToIntake = new Path(new BezierLine(readyToIntakeLine2, new Pose(124, readyToIntakeLine2.getY())));
+        line2moveToIntake = new Path(new BezierLine(new Pose(readyToIntakeLine2.getX(), readyToIntakeLine2.getY()+3.5), new Pose(123, readyToIntakeLine2.getY())));
         line2moveToIntake.setLinearHeadingInterpolation(readyToIntakeLine2.getHeading(), readyToIntakeLine2.getHeading());
 
         openGate = new Path(new BezierCurve(new Pose(124, readyToIntakeLine2.getY()), new Pose(121.6, 64), new Pose(126.6, 63.9)));
         openGate.setLinearHeadingInterpolation(readyToIntakeLine2.getHeading(), readyToIntakeLine2.getHeading());
 
-        moveToScore3 = new Path(new BezierCurve(new Pose(126.6, 63.9), new Pose(101.7, 63.3), scoreShort));
+        moveToScore3 = new Path(new BezierCurve(new Pose(124, readyToIntakeLine2.getY()), new Pose(101.7, 63.3), scoreShort));
         moveToScore3.setLinearHeadingInterpolation(readyToIntakeLine2.getHeading(), scoreShort.getHeading());
 
         park = new Path(new BezierLine(scoreShort, new Pose(scoreShort.getX()+10, scoreShort.getY()-5)));
