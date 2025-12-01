@@ -14,11 +14,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Func;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Configurable
 public class Outtake {
@@ -35,6 +37,8 @@ public class Outtake {
     public static CRServo frontFeeder;
 
     public static Servo rearFeeder;
+
+    public DistanceSensor disSensor1;
 
     public static double velo = 1515;
 
@@ -60,6 +64,8 @@ public class Outtake {
         rightGate = hardwareMap.get(Servo.class, "rightGate");
         rearFeeder = hardwareMap.get(Servo.class, "rearFeeder");
         frontFeeder = hardwareMap.get(CRServo.class, "frontFeeder");
+
+        disSensor1 = hardwareMap.get(DistanceSensor.class, "disSensor1");
 
 
 
@@ -245,5 +251,14 @@ public class Outtake {
     public void StopBallLoop() {
         launcher.setVelocityPIDFCoefficients(p, i, d, f);
 
-        launcher.setVelocity(100);}
+        launcher.setVelocity(100);
+    }
+
+    public boolean BallFound() {
+        if (disSensor1.getDistance(DistanceUnit.MM) < 10){
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
