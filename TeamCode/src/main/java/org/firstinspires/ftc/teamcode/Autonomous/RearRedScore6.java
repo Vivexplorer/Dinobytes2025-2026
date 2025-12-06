@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.LauncherPID;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RearRedScore6")
+@Autonomous(name = "RearRed6")
 public class RearRedScore6 extends OpMode {
     Intake intake;
 
@@ -112,7 +112,7 @@ public class RearRedScore6 extends OpMode {
                 break;
 
             case 4:
-                if (pathTimer.getElapsedTimeSeconds()>0.75) {
+                if (pathTimer.getElapsedTimeSeconds()>1) {
                     outtake.openBoot();
                     setPathState(7);
 
@@ -135,7 +135,7 @@ public class RearRedScore6 extends OpMode {
 //                break;
 
             case 7:
-                if (pathTimer.getElapsedTimeSeconds()>0.60) {
+                if (pathTimer.getElapsedTimeSeconds()>0.9) {
                     outtake.closeBoot();
                     setPathState(8);
                 }
@@ -151,7 +151,7 @@ public class RearRedScore6 extends OpMode {
                 break;
 
             case 9:
-                if (pathTimer.getElapsedTimeSeconds()>0.65) {
+                if (pathTimer.getElapsedTimeSeconds()>0.9) {
                     outtake.closeBoot();
                     setPathState(10);
                 }
@@ -283,7 +283,7 @@ public class RearRedScore6 extends OpMode {
         line1moveToScore = new Path(new BezierCurve(new Pose(120,33), new Pose(107, 26.5), shootLong));
         line1moveToScore.setLinearHeadingInterpolation(Math.toRadians(0), shootLong.getHeading());
 
-        moveOutOfScore = new Path(new BezierLine(shootLong, new Pose(shootLong.getX()+5, shootLong.getY()+8)));
+        moveOutOfScore = new Path(new BezierLine(shootLong, new Pose(shootLong.getX()+5, shootLong.getY()+15)));
         moveOutOfScore.setLinearHeadingInterpolation(shootLong.getHeading(), Math.toRadians(90));
 
 

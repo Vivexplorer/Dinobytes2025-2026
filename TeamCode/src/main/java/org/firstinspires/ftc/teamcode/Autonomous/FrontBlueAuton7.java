@@ -8,21 +8,15 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Subsystems.CameraSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.Intake;
 import org.firstinspires.ftc.teamcode.Subsystems.LauncherPID;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
-
-
-@Autonomous(name = "NewFrontRedAuton")
-public class NewFrontRedAuton extends OpMode {
+@Autonomous(name = "FrontBlueAuton7")
+public class FrontBlueAuton7 extends OpMode {
     Intake intake;
 
     Outtake outtake;
@@ -41,14 +35,14 @@ public class NewFrontRedAuton extends OpMode {
 
     private int pathState = -1;
 
-    private final Pose startPose = new Pose(120.907, 125.977, Math.toRadians(37));
+    private final Pose startPose = new Pose(28, 128, Math.toRadians(143));
 
-    private final Pose scoreShort = new Pose(83.7, 81, Math.toRadians(48));
+    private final Pose scoreShort = new Pose(60.3, 81, Math.toRadians(132));
 
 
-    private final Pose readyToIntakeLine1 = new Pose(100, 85, Math.toRadians(0));
+    private final Pose readyToIntakeLine1 = new Pose(44, 80, Math.toRadians(180));
 
-    private final Pose readyToIntakeLine2 = new Pose(96, 62, Math.toRadians(0));
+    private final Pose readyToIntakeLine2 = new Pose(48, 59, Math.toRadians(180));
 
 
 
@@ -91,10 +85,10 @@ public class NewFrontRedAuton extends OpMode {
 
 
             case -1:
-                LauncherPID.velocity = 300;
-                outtake.runFeeder();
+                LauncherPID.velocity = 400;
+
                 intake.spinIntake();
-                follower.setMaxPower(1);
+                follower.setMaxPower(0.7);
                 follower.followPath(moveToScore1);
                 counter = 1;
                 setPathState(1);
@@ -105,19 +99,20 @@ public class NewFrontRedAuton extends OpMode {
 
             case 1:
                 if(!follower.isBusy()) {
-                    follower.setMaxPower(1);
+                    follower.setMaxPower(0.7);
                     intake.spinIntake();
                     launcherPID.StartShooter();
-                    setPathState(8);
+                    setPathState(4);
                 }
                 break;
 
-                //take out case 4 and 5
+            //take out case 4 and 5
 
 
 
             case 4:
                 if (launcherPID.launcher.getVelocity()< -1500) {
+                    outtake.runFeeder();
                     outtake.closeBoot();
                     setPathState(5);
                 }
@@ -126,7 +121,11 @@ public class NewFrontRedAuton extends OpMode {
             case 5:
                 if (pathTimer.getElapsedTimeSeconds()>0.75) {
                     outtake.openBoot();
-                    setPathState(8);
+                    if (counter == 3) {
+                        setPathState(200);
+                    }else {
+                        setPathState(8);
+                    }
                 }
                 break;
 
@@ -135,16 +134,17 @@ public class NewFrontRedAuton extends OpMode {
 
 
             case 8:
-                if (launcherPID.launcher.getVelocity()<-1500) {
+                if (pathTimer.getElapsedTimeSeconds()>0.75) {
                     outtake.closeBoot();
                     setPathState(9);
                 }
                 break;
 
             case 9:
-                if (pathTimer.getElapsedTimeSeconds()>1) {
+                if (pathTimer.getElapsedTimeSeconds()>0.7) {
                     outtake.openBoot();
                     setPathState(12);
+
 
                 }
                 break;
@@ -152,7 +152,7 @@ public class NewFrontRedAuton extends OpMode {
 
 
             case 12:
-                if (outtake.BallFound() || pathTimer.getElapsedTimeSeconds()> 1.5) {
+                if (pathTimer.getElapsedTimeSeconds()>0.78) {
                     outtake.closeBoot();
                     setPathState(13);
                 }
@@ -161,17 +161,13 @@ public class NewFrontRedAuton extends OpMode {
             case 13:
                 if(pathTimer.getElapsedTimeSeconds()>0.5) {
                     outtake.openBoot();
-                    if (counter == 3) {
-                        setPathState(200);
-                    }else {
-                        setPathState(6);
-                    }
+                    setPathState(6);
 
                 }
                 break;
 
             case 6:
-                if (outtake.BallFound() || pathTimer.getElapsedTimeSeconds() > 1.5) {
+                if (pathTimer.getElapsedTimeSeconds()>0.75) {
                     outtake.closeBoot();
                     setPathState(7);
                 }
@@ -197,6 +193,7 @@ public class NewFrontRedAuton extends OpMode {
 
                     intake.spinIntake();
                     launcherPID.StopShooter();
+                    follower.setMaxPower(1);
                     follower.followPath(line1readyToIntake);
                     setPathState(51);
                 }
@@ -204,7 +201,7 @@ public class NewFrontRedAuton extends OpMode {
 
             case 51:
                 if (!follower.isBusy()) {
-                    LauncherPID.velocity = 300;
+                    LauncherPID.velocity = 400;
                     follower.setMaxPower(0.5);
                     follower.followPath(line1moveToIntake);
                     setPathState(52);
@@ -221,13 +218,13 @@ public class NewFrontRedAuton extends OpMode {
                 }
                 break;
 
-                //start line 2 intake sequence
+            //start line 2 intake sequence
 
             case 53:
                 if (pathTimer.getElapsedTimeSeconds()>0.75) {
 
                     intake.spinIntake();
-                    LauncherPID.velocity = 300;
+                    LauncherPID.velocity = 400;
                     follower.setMaxPower(1);
                     follower.followPath(line2readyToIntake);
                     setPathState(54);
@@ -243,7 +240,7 @@ public class NewFrontRedAuton extends OpMode {
                 break;
 
 
-                //dont use opengate
+            //dont use opengate
             case 55:
                 if (!follower.isBusy()) {
                     follower.setMaxPower(0.3);
@@ -262,7 +259,7 @@ public class NewFrontRedAuton extends OpMode {
                 }
                 break;
 
-               //parking
+            //parking
 
             case 200:
                 if (pathTimer.getElapsedTimeSeconds()>0) {
@@ -302,25 +299,25 @@ public class NewFrontRedAuton extends OpMode {
         line1readyToIntake = new Path(new BezierLine(scoreShort, readyToIntakeLine1));
         line1readyToIntake.setLinearHeadingInterpolation(scoreShort.getHeading(), readyToIntakeLine1.getHeading());
 
-        line1moveToIntake = new Path(new BezierLine(readyToIntakeLine1, new Pose(readyToIntakeLine1.getX()+24, readyToIntakeLine1.getY())));
+        line1moveToIntake = new Path(new BezierLine(readyToIntakeLine1, new Pose(readyToIntakeLine1.getX()-24, readyToIntakeLine1.getY())));
         line1moveToIntake.setLinearHeadingInterpolation(readyToIntakeLine1.getHeading(), readyToIntakeLine1.getHeading());
 
-        moveToScore2 = new Path(new BezierLine(new Pose(readyToIntakeLine1.getX()+24, readyToIntakeLine1.getY()), scoreShort));
+        moveToScore2 = new Path(new BezierLine(new Pose(readyToIntakeLine1.getX()-24, readyToIntakeLine1.getY()), scoreShort));
         moveToScore2.setLinearHeadingInterpolation(readyToIntakeLine1.getHeading(), scoreShort.getHeading());
 
         line2readyToIntake = new Path(new BezierLine(scoreShort, new Pose(readyToIntakeLine2.getX(), readyToIntakeLine2.getY()+3.5)));
         line2readyToIntake.setLinearHeadingInterpolation(scoreShort.getHeading(), readyToIntakeLine2.getHeading());
 
-        line2moveToIntake = new Path(new BezierLine(new Pose(readyToIntakeLine2.getX(), readyToIntakeLine2.getY()+3.5), new Pose(123, readyToIntakeLine2.getY())));
+        line2moveToIntake = new Path(new BezierLine(new Pose(readyToIntakeLine2.getX(), readyToIntakeLine2.getY()), new Pose(21, readyToIntakeLine2.getY())));
         line2moveToIntake.setLinearHeadingInterpolation(readyToIntakeLine2.getHeading(), readyToIntakeLine2.getHeading());
 
-        openGate = new Path(new BezierCurve(new Pose(124, readyToIntakeLine2.getY()), new Pose(121.6, 64), new Pose(126.6, 63.9)));
+        openGate = new Path(new BezierCurve(new Pose(21, readyToIntakeLine2.getY()), new Pose(22.4, 64), new Pose(17.4, 63.9)));
         openGate.setLinearHeadingInterpolation(readyToIntakeLine2.getHeading(), readyToIntakeLine2.getHeading());
 
-        moveToScore3 = new Path(new BezierCurve(new Pose(124, readyToIntakeLine2.getY()), new Pose(101.7, 63.3), scoreShort));
+        moveToScore3 = new Path(new BezierCurve(new Pose(21, readyToIntakeLine2.getY()), new Pose(42.3, 63.3), scoreShort));
         moveToScore3.setLinearHeadingInterpolation(readyToIntakeLine2.getHeading(), scoreShort.getHeading());
 
-        park = new Path(new BezierLine(scoreShort, new Pose(scoreShort.getX()+10, scoreShort.getY()-5)));
+        park = new Path(new BezierLine(scoreShort, new Pose(scoreShort.getX()-28, scoreShort.getY()-5)));
         park.setLinearHeadingInterpolation(scoreShort.getHeading(), scoreShort.getHeading());
 
 
@@ -341,7 +338,6 @@ public class NewFrontRedAuton extends OpMode {
         launcherPID.shooterLoop();
 
         telemetry.addData("path state", pathState);
-        telemetry.addData("ball distance ", outtake.disSensor1.getDistance(DistanceUnit.MM));
         telemetry.update();
 
     }

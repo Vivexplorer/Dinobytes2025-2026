@@ -232,7 +232,7 @@ public class Outtake {
 
     public void stopFeeder(){frontFeeder.setPower(0.0);}
     public void openBoot(){
-        rearFeeder.setPosition(0.28);
+        rearFeeder.setPosition(0.31);
     }
     public void closeBoot(){
         rearFeeder.setPosition(1.0);

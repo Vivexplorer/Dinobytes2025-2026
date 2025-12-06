@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.LauncherPID;
 import org.firstinspires.ftc.teamcode.Subsystems.Outtake;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RearBlueScore6")
+@Autonomous(name = "RearBlue6")
 public class RearBlueScore6 extends OpMode {
     Intake intake;
 
@@ -283,7 +283,7 @@ public class RearBlueScore6 extends OpMode {
         line1moveToScore = new Path(new BezierCurve(new Pose(14,33), new Pose(37, 26.5), shootLong));
         line1moveToScore.setLinearHeadingInterpolation(Math.toRadians(180), shootLong.getHeading() + Math.toRadians(3));
 
-        moveOutOfScore = new Path(new BezierLine(shootLong, new Pose(shootLong.getX()-5, shootLong.getY()+8)));
+        moveOutOfScore = new Path(new BezierLine(shootLong, new Pose(shootLong.getX()-5, shootLong.getY()+15)));
         moveOutOfScore.setLinearHeadingInterpolation(shootLong.getHeading() + Math.toRadians(3), Math.toRadians(90));
 
 

@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 
-@Autonomous(name = "RearRedScore7")
+@Autonomous(name = "RearRed7")
 public class RearRedScore7 extends OpMode {
     Intake intake;
 

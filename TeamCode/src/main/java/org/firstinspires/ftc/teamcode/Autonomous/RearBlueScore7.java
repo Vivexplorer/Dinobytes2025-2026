@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 
 
-@Autonomous(name = "RearBlueScore7")
+@Autonomous(name = "RearBlue7")
 public class RearBlueScore7 extends OpMode {
     Intake intake;
 
@@ -347,7 +347,7 @@ public class RearBlueScore7 extends OpMode {
         scoreLine2 = new Path(new BezierLine(new Pose(readyToIntake.getX()-20, readyToIntake.getY() + 24), scoreShort));
         scoreLine2.setLinearHeadingInterpolation(Math.toRadians(180), scoreShort.getHeading());
 
-        moveOutOfScore2 = new Path(new BezierLine(scoreShort, new Pose(scoreShort.getX()-10, scoreShort.getY()-35)));
+        moveOutOfScore2 = new Path(new BezierLine(scoreShort, new Pose(scoreShort.getX()-10, scoreShort.getY()-20)));
         moveOutOfScore2.setLinearHeadingInterpolation(scoreShort.getHeading(), Math.toRadians(90));
 
 
